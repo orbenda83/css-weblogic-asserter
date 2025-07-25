@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import weblogic.logging.NonCatalogLogger;
 import weblogic.management.security.ProviderMBean;
 import weblogic.security.auth.callback.IdentityDomainUserCallback;
-import weblogic.security.auth.callback.ImpersonateCallbackHandler;
 import weblogic.security.principal.WLSUserImpl;
 import weblogic.security.provider.PrincipalValidatorImpl;
 import weblogic.security.service.ContextHandler;
@@ -36,12 +35,12 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     public void initialize(ProviderMBean mbean, SecurityServices services) {
         logger.debug("CustomRealmIdentityAsserterProviderImpl.initialize");
         this._mBean = (CustomRealmIdentityAsserterMBean) mbean;
-        
+
         // Use the MBean to get configuration
         this.headerName = this._mBean.getHeaderName();
         this.debugEnabled = this._mBean.isDebugEnabled();
         this.description = this._mBean.getDescription() + "\n" + this._mBean.getVersion();
-        
+
         this.controlFlag = AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT;
         // Get the principal validator from the security services
         this.principalValidator = services.getPrincipalValidator();
@@ -70,12 +69,14 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     }
 
     @Override
-    public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler) throws IdentityAssertionException {
+    public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler)
+            throws IdentityAssertionException {
         if (debugEnabled) {
             logger.debug("assertIdentity called with type: " + type);
         }
-        
-        // The "type" for an Identity Asserter is the token name from the provider configuration
+
+        // The "type" for an Identity Asserter is the token name from the provider
+        // configuration
         // In this case, it should match the active token type in the WebLogic console.
         // We will assume it's configured to be the header name for simplicity.
         if (!type.equals(this.headerName)) {
@@ -91,14 +92,15 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         if (username == null || username.isEmpty()) {
             // No user in the header, so we don't assert an identity.
             // Throwing an exception might be too aggressive if other asserters should try.
-            // Returning null is often better. For this example, we'll stick to the exception.
+            // Returning null is often better. For this example, we'll stick to the
+            // exception.
             throw new IdentityAssertionException("No username provided in header: " + headerName);
         }
 
         if (debugEnabled) {
             logger.debug("Extracted username: " + username);
         }
-        
+
         // --- FIX #4 & #5: Use the PrincipalValidator ---
         boolean isValid = validateUserInRealm(username);
 
@@ -106,9 +108,26 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             if (debugEnabled) {
                 logger.debug("User " + username + " validated successfully. Returning callback handler.");
             }
-            // --- FIX #2: Return a CallbackHandler, not a Subject ---
-            // This handler tells WebLogic to impersonate the specified user.
-            return new ImpersonateCallbackHandler(new IdentityDomainUserCallback(null, new WLSUserImpl(username)));
+
+            // Create the subject for the validated user
+            final Subject userSubject = new Subject();
+            userSubject.getPrincipals().add(new WLSUserImpl(username));
+            
+            // Return a new CallbackHandler that provides the user Subject when asked.
+            // This is the modern, compatible way to achieve impersonation.
+            return new CallbackHandler() {
+                public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
+                    for (int i = 0; i < callbacks.length; i++) {
+                        Callback callback = callbacks[i];
+                        if (callback instanceof IdentityDomainUserCallback) {
+                            IdentityDomainUserCallback iduc = (IdentityDomainUserCallback) callback;
+                            iduc.setUser(userSubject);
+                        } else {
+                            throw new UnsupportedCallbackException(callback, "Unrecognized Callback");
+                        }
+                    }
+                }
+            };
         } else {
             if (debugEnabled) {
                 logger.debug("User " + username + " not found in security realm or is invalid.");
@@ -142,7 +161,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
 
             // Use the PrincipalValidator to check if the user is valid in the realm
             this.principalValidator.validate(userSubject, null);
-            
+
             // If validate() does not throw an exception, the user is considered valid.
             return true;
         } catch (Exception e) {
@@ -154,7 +173,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     }
 
     // --- FIX #6: Remove @Override from custom methods not in the interfaces ---
-    
+
     public String getHeaderName() {
         return headerName;
     }

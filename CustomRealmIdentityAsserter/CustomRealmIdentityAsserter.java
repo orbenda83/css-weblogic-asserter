@@ -64,6 +64,14 @@ public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, Id
         return "1.0.0";
     }
 
+    public String getProviderClassName() {
+        return "com.oracle.il.css.CustomRealmIdentityAsserter";
+    }
+
+    public void setProviderClassName(String providerClassName) {
+        this.providerClassName = providerClassName;
+    }
+
     public AppConfigurationEntry getLoginModuleConfiguration() {
         return null; // No login module required for identity assertion
     }

@@ -47,7 +47,7 @@
   Type          = "java.lang.String"
   Writeable     = "false"
   Preprocessor = "weblogic.management.configuration.LegalHelper.checkClassName(value)"
-  Default       = "&quot;com.oracle.il.css.CustomRealmIdentityAsserterProviderImpl&quot;"
+  Default       = "com.oracle.il.css.CustomRealmIdentityAsserterProviderImpl"
  />
 
  <!-- You must set the value of the Description attribute
@@ -59,7 +59,7 @@
   Name          = "Description"
   Type          = "java.lang.String"
   Writeable     = "false"
-  Default       = "&quot;WebLogic Custom Realm Identity Asserter Provider&quot;"
+  Default       = "WebLogic Custom Realm Identity Asserter Provider"
  />
 
  <!-- You must set the value of the Version attribute
@@ -70,7 +70,7 @@
   Name          = "Version"
   Type          = "java.lang.String"
   Writeable     = "false"
-  Default       = "&quot;1.0&quot;"
+  Default       = "1.0.0"
  />
 
  <!-- You must set the value of the SupportedTypes attribute
@@ -167,16 +167,16 @@
   Name          = "HeaderName"
   Type          = "java.lang.String"
   Writeable     = "true"
-  Default       = "&quot;X-User-Id&quot;"
-  DisplayName   = "&quot;The HTTP header to extract the user identity from.&quot;"
+  Default       = "X-User-Id"
+  DisplayName   = "The HTTP header to extract the user identity from."
  />
-<MBeanAttribute
-  Name          = "DebugEnabled"
-  Type          = "boolean"
-  Writeable     = "true"
-  Default       = "false"
-  DisplayName   = "&quot;Enable debug logging for the identity asserter.&quot;"
- />
+
+ <MBeanAttribute
+    Name="DebugEnabled"
+    Type="java.lang.Boolean"
+    Default="false"
+    DisplayName="A flag to enable or disable debug logging for the provider."
+/>
 
 
 </MBeanType>

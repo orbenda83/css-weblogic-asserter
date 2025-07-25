@@ -18,12 +18,11 @@ public class CustomRealmIdentityAsserterImpl implements AuthenticationProviderV2
     private NonCatalogLogger logger;
     private String description = "Custom Identity Asserter for Realm Validation";
 
-    public CustomRealmIdentityAsserterImpl() {
-        this.logger = new NonCatalogLogger("CustomRealmIdentityAsserterImpl");
-    }
+    public CustomRealmIdentityAsserterImpl() {}
 
     @Override
     public void initialize(SecurityServices services) {
+        this.logger = new NonCatalogLogger("CustomRealmIdentityAsserterImpl");
         if (debugEnabled) {
             logger.debug("Initializing CustomRealmIdentityAsserterImpl with headerName: " + headerName);
         }

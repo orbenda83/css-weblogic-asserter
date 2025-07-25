@@ -18,6 +18,8 @@ import weblogic.security.spi.IdentityAssertionException;
 import weblogic.security.spi.PrincipalValidator;
 import weblogic.security.spi.SecurityServices;
 
+import java.util.HashMap;
+
 
 public final class CustomRealmIdentityAsserterProviderImpl implements AuthenticationProviderV2, IdentityAsserterV2 {
     private String headerName;

@@ -33,6 +33,10 @@ public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, Id
         return "CustomRealmIdentityAsserter";
     }
 
+    public boolean getDebugEnabled() {
+        return debugEnabled;
+    }
+
     public String getDescription() {
         return description;
     }

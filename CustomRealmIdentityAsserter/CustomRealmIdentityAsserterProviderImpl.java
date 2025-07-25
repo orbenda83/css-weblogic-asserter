@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.login.AppConfigurationEntry;
+import javax.security.auth.Subject;
+import javax.servlet.http.HttpServletRequest;
 
 import weblogic.management.security.ProviderMBean;
 
@@ -16,9 +18,6 @@ import weblogic.security.spi.PrincipalValidator;
 import weblogic.security.spi.SecurityServices;
 
 import weblogic.logging.NonCatalogLogger;
-
-import javax.servlet.http.HttpServletRequest;
-
 
 public final class CustomRealmIdentityAsserterProviderImpl implements AuthenticationProviderV2, IdentityAsserterV2 {
     private String headerName = "X-User-Id";

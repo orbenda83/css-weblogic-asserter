@@ -60,6 +60,10 @@ public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, Id
         return new String[] { "GET", "POST", "PUT", "DELETE" };
     }
 
+    public String getVersion() {
+        return "1.0.0";
+    }
+
     public AppConfigurationEntry getLoginModuleConfiguration() {
         return null; // No login module required for identity assertion
     }

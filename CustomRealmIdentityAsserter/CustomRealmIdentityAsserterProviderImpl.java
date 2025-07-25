@@ -6,6 +6,7 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.servlet.http.HttpServletRequest;
+import javax.security.auth.callback.UserCallback;
 
 import weblogic.logging.NonCatalogLogger;
 import weblogic.management.security.ProviderMBean;

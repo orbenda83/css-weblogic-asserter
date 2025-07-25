@@ -12,7 +12,7 @@
         Name="ProviderClassName"
         Type="java.lang.String"
         Writeable="false"
-        Default=""com.oracle.il.css.CustomRealmIdentityAsserterProviderImpl""
+        Default="&quot;com.oracle.il.css.CustomRealmIdentityAsserterProviderImpl&quot;"
     />
 
     <!-- The user-visible description of the provider instance -->
@@ -20,7 +20,7 @@
         Name="Description"
         Type="java.lang.String"
         Writeable="false"
-        Default=""WebLogic Custom Realm Identity Asserter Provider""
+        Default="&quot;WebLogic Custom Realm Identity Asserter Provider&quot;"
     />
 
     <!-- The version of the provider -->
@@ -28,14 +28,14 @@
         Name="Version"
         Type="java.lang.String"
         Writeable="false"
-        Default=""1.0.0""
+        Default="&quot;1.0.0&quot;"
     />
 
     <!-- The name of the HTTP header to check for the username -->
     <MBeanAttribute
         Name="HeaderName"
         Type="java.lang.String"
-        Default=""X-User-Id""
+        Default="&quot;X-User-Id&quot;"
         Description="The name of the HTTP header that contains the user ID."
     />
     

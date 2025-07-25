@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.logging.Logger;
 import weblogic.security.services.Authentication;
 
-public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, IdentityAsserterV2, CustomRealmIdentityAsserterMBean {
+public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, IdentityAsserterV2 {
     private String headerName = "X-User-Id";
     private boolean debugEnabled = false;
     private static final Logger logger = Logger.getLogger(CustomRealmIdentityAsserter.class.getName());
@@ -32,48 +32,17 @@ public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, Id
     public String getName() {
         return "CustomRealmIdentityAsserter";
     }
-    public void setName(String name) {
-        this.name = name;
-    }
-
+    
     public boolean getDebugEnabled() {
         return debugEnabled;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public boolean getBase64DecodingRequired() {
-        return false;
-    }
-
-    public String[] getActiveTypes() {
-        return new String[] { "GET", "POST", "PUT", "DELETE" };
-    }
-
-    public void setActiveTypes(String[] activeTypes) {
-        this.activeTypes = activeTypes;
-    }
-
-    public String[] getSupportedTypes() {
-        return new String[] { "GET", "POST", "PUT", "DELETE" };
-    }
-
-    public String getVersion() {
-        return "1.0.0";
-    }
-
-    public String getProviderClassName() {
-        return "com.oracle.il.css.CustomRealmIdentityAsserter";
-    }
-
-    public void setProviderClassName(String providerClassName) {
-        this.providerClassName = providerClassName;
-    }
-
     public AppConfigurationEntry getLoginModuleConfiguration() {
         return null; // No login module required for identity assertion
+    }
+
+    public String wls_getObjectName() {
+        return "com.oracle.il.css.CustomRealmIdentityAsserter";
     }
 
     public AppConfigurationEntry getAssertionModuleConfiguration() {

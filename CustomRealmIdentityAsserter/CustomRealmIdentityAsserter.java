@@ -48,11 +48,11 @@ public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, Id
         return false;
     }
 
-    public void setActiveTypes(String[] activeTypes) {
-        this.activeTypes = activeTypes;
+    public String[] getActiveTypes() {
+        return new String[] { "GET", "POST", "PUT", "DELETE" };
     }
 
-    public String[] getActiveTypes() {
+    public String[] getSupportedTypes() {
         return new String[] { "GET", "POST", "PUT", "DELETE" };
     }
 

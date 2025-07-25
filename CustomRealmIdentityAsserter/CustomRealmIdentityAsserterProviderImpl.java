@@ -7,9 +7,13 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.servlet.http.HttpServletRequest;
 
+// Import the specific MBean interface
+import com.oracle.il.css.CustomRealmIdentityAsserterMBean;
+// Import the older UserCallback
+import weblogic.security.auth.callback.UserCallback;
+
 import weblogic.logging.NonCatalogLogger;
 import weblogic.management.security.ProviderMBean;
-import weblogic.security.auth.callback.IdentityDomainUserCallback;
 import weblogic.security.principal.WLSUserImpl;
 import weblogic.security.provider.PrincipalValidatorImpl;
 import weblogic.security.service.ContextHandler;
@@ -18,6 +22,7 @@ import weblogic.security.spi.IdentityAsserterV2;
 import weblogic.security.spi.IdentityAssertionException;
 import weblogic.security.spi.PrincipalValidator;
 import weblogic.security.spi.SecurityServices;
+
 
 public final class CustomRealmIdentityAsserterProviderImpl implements AuthenticationProviderV2, IdentityAsserterV2 {
     private String headerName;
@@ -47,10 +52,10 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     public IdentityAsserterV2 getIdentityAsserter() {
         return this;
     }
-
-    // FIX #1: Correct method name for this WLS version
+    
+    // FIX #1: Correct method signature for this WLS version
     @Override
-    public AppConfigurationEntry getLoginModuleConfiguration() {
+    public AppConfigurationEntry getAssertionModuleConfiguration() {
         return null;
     }
 
@@ -74,35 +79,28 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         if (username == null || username.isEmpty()) {
             return null;
         }
-
-        if (debugEnabled) {
-            logger.debug("assertIdentity found user '" + username + "'");
-        }
         
         final Principal userPrincipal = new WLSUserImpl(username);
         
         if (validateUserInRealm(userPrincipal)) {
             if (debugEnabled) {
-                logger.debug("User '" + username + "' validated successfully.");
+                logger.debug("User '" + username + "' validated. Returning UserCallback.");
             }
             
             return new CallbackHandler() {
                 public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
                     for (Callback callback : callbacks) {
-                        if (callback instanceof IdentityDomainUserCallback) {
-                            IdentityDomainUserCallback iduc = (IdentityDomainUserCallback) callback;
-                            // FIX #2: Pass the Principal object
-                            iduc.setUser(userPrincipal);
+                        // FIX #2: Use the older, simpler UserCallback
+                        if (callback instanceof UserCallback) {
+                            UserCallback uc = (UserCallback) callback;
+                            uc.setUser(username);
                         } else {
-                            throw new UnsupportedCallbackException(callback, "Unrecognized Callback");
+                            throw new UnsupportedCallbackException(callback, "Unrecognized Callback, expected UserCallback");
                         }
                     }
                 }
             };
         } else {
-            if (debugEnabled) {
-                logger.debug("User '" + username + "' was not found in the security realm.");
-            }
             throw new IdentityAssertionException("User '" + username + "' not found in security realm.");
         }
     }
@@ -111,9 +109,6 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         try {
             return this.principalValidator.validate(principal);
         } catch (Exception e) {
-            if (debugEnabled) {
-                logger.debug("Exception during principal validation: " + e.getMessage());
-            }
             return false;
         }
     }

@@ -19,6 +19,18 @@ import weblogic.security.spi.SecurityServices;
 
 import weblogic.logging.NonCatalogLogger;
 
+import weblogic.security.spi.AuthenticationProviderV2;
+import weblogic.security.spi.IdentityAsserterV2;
+import weblogic.security.spi.IdentityAssertionException;
+import weblogic.security.spi.SecurityServices;
+import weblogic.security.service.SecurityServiceManager;
+import weblogic.security.service.ContextHandler;
+import weblogic.security.principal.WLSUserImpl;
+import weblogic.logging.NonCatalogLogger;
+import javax.security.auth.Subject;
+import javax.security.auth.login.AppConfigurationEntry;
+import java.util.HashMap;
+
 public final class CustomRealmIdentityAsserterProviderImpl implements AuthenticationProviderV2, IdentityAsserterV2 {
     private String headerName = "X-User-Id";
     private boolean debugEnabled = false;

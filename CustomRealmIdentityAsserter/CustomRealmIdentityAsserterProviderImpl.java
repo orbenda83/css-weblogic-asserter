@@ -107,4 +107,19 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             return false;
         }
     }
+
+    public AppConfigurationEntry getLoginModuleConfiguration() {
+        System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration of non Assertion!!! ");
+
+        HashMap<String, Object> hashMap = new HashMap<String, Object>();
+        hashMap.put("IdentityAssertion", "false");
+        return getConfiguration(hashMap);
+    }
+
+    private AppConfigurationEntry getConfiguration(HashMap<String, ?> paramHashMap) {
+        System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration");
+
+        return new AppConfigurationEntry("com.oracle.il.css.CustomRealmLoginModuleImpl", this.controlFlag,
+                                         paramHashMap);
+    }
 }

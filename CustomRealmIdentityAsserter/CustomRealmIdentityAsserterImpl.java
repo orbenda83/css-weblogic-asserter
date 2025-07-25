@@ -15,6 +15,8 @@ import weblogic.security.spi.IdentityAssertionException;
 import weblogic.security.spi.PrincipalValidator;
 import weblogic.security.spi.SecurityServices;
 
+import weblogic.logging.NonCatalogLogger;
+
 import javax.servlet.http.HttpServletRequest;
 
 
@@ -24,6 +26,13 @@ public final class CustomRealmIdentityAsserterImpl implements AuthenticationProv
     private String description = "Custom Identity Asserter for Realm Validation";
     private AppConfigurationEntry.LoginModuleControlFlag controlFlag;
     private CustomRealmIdentityAsserterMBean _mBean = null;
+
+    public CustomRealmIdentityAsserterImpl() {
+        this.logger = new NonCatalogLogger("CustomRealmIdentityAsserterImpl");
+        if (debugEnabled) {
+            logger.debug("Initializing CustomRealmIdentityAsserterImpl with headerName: " + headerName);
+        }
+    }
 
     public void initialize(ProviderMBean mbean, SecurityServices services) {
         System.out.println("CustomRealmIdentityAsserterImpl.initialize");

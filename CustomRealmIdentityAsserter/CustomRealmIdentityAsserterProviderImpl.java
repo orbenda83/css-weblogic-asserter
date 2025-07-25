@@ -17,6 +17,8 @@ import weblogic.security.spi.IdentityAsserterV2;
 import weblogic.security.spi.IdentityAssertionException;
 import weblogic.security.spi.PrincipalValidator;
 import weblogic.security.spi.SecurityServices;
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.UnsupportedCallbackException;
 
 public final class CustomRealmIdentityAsserterProviderImpl implements AuthenticationProviderV2, IdentityAsserterV2 {
     private String headerName = "X-User-Id";
@@ -112,7 +114,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             // Create the subject for the validated user
             final Subject userSubject = new Subject();
             userSubject.getPrincipals().add(new WLSUserImpl(username));
-            
+
             // Return a new CallbackHandler that provides the user Subject when asked.
             // This is the modern, compatible way to achieve impersonation.
             return new CallbackHandler() {

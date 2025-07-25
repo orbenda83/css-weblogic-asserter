@@ -18,10 +18,19 @@ public class CustomRealmIdentityAsserterImpl implements AuthenticationProviderV2
     private NonCatalogLogger logger;
     private String description = "Custom Identity Asserter for Realm Validation";
 
-    public CustomRealmIdentityAsserterImpl() {}
+    // public CustomRealmIdentityAsserterImpl() {
+    //     this.logger = new NonCatalogLogger("CustomRealmIdentityAsserterImpl");
+    //     if (debugEnabled) {
+    //         logger.debug("Initializing CustomRealmIdentityAsserterImpl with headerName: " + headerName);
+    //     }
+    // }
 
     @Override
-    public void initialize(SecurityServices services) {
+    public void initialize(ProviderMBean mbean, SecurityServices services) {
+        System.out.println("CustomRealmIdentityAsserterImpl.initialize");
+        CustomRealmIdentityAsserterMBean myMBean = (CustomRealmIdentityAsserterMBean) mbean;
+        this.headerName = myMBean.getHeaderName();
+        this.debugEnabled = myMBean.getDebugEnabled();
         this.logger = new NonCatalogLogger("CustomRealmIdentityAsserterImpl");
         if (debugEnabled) {
             logger.debug("Initializing CustomRealmIdentityAsserterImpl with headerName: " + headerName);

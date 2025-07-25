@@ -86,7 +86,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
                 logger.debug("User '" + username + "' validated. Returning UserCallback.");
             }
             
-            return new CustomRealmCallbackHandlerImpl(user);
+            return new CustomRealmCallbackHandlerImpl(username);
         } else {
             throw new IdentityAssertionException("User '" + username + "' not found in security realm.");
         }

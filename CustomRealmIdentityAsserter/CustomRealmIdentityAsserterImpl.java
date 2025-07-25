@@ -45,152 +45,102 @@ public final class CustomRealmIdentityAsserterImpl implements AuthenticationProv
         return this;
     }
 
-    public CallbackHandler assertIdentity(String type, Object token,
-                                          ContextHandler context) throws IdentityAssertionException {
-        System.out.println(context.getNames().toString());
-        System.out.println("CustomRealmIdentityAsserterImpl.assertIdentity");
-        System.out.println("\tType\t\t= " + type);
-        System.out.println("\tToken\t\t= " + token);
+    @Override
+    public Subject assertIdentity(String type, Object token, ContextHandler contextHandler) throws IdentityAssertionException {
+        if (debugEnabled) {
+            logger.debug("assertIdentity called with type: " + type);
+        }
 
-        Object requestValue = context.getValue("com.bea.contextelement.servlet.HttpServletRequest");
-        if ((requestValue == null) || (!(requestValue instanceof HttpServletRequest))) {
-            System.out.println("do nothing");
+        if (!headerName.equals(type)) {
+            if (debugEnabled) {
+                logger.debug("Token type " + type + " does not match configured header: " + headerName);
+            }
+            throw new IdentityAssertionException("Unsupported token type: " + type);
+        }
+
+        String username = extractTokenFromHeader(token, contextHandler);
+
+        if (username == null || username.isEmpty()) {
+            if (debugEnabled) {
+                logger.debug("No username provided in header: " + headerName);
+            }
+            throw new IdentityAssertionException("No username provided in header");
+        }
+
+        if (debugEnabled) {
+            logger.debug("Extracted username: " + username);
+        }
+
+        boolean isValid = validateUserInRealm(username);
+
+        if (isValid) {
+            if (debugEnabled) {
+                logger.debug("User " + username + " validated successfully");
+            }
+            Subject subject = new Subject();
+            subject.getPrincipals().add(new WLSUserImpl(username));
+            return subject;
         } else {
-            HttpServletRequest request = (HttpServletRequest) requestValue;
-            java.util.Enumeration names = request.getHeaderNames();
-            while (names.hasMoreElements()) {
-                String name = (String) names.nextElement();
-                System.out.println(name + ":" + request.getHeader(name));
+            if (debugEnabled) {
+                logger.debug("User " + username + " not found in security realm");
+            }
+            throw new IdentityAssertionException("User not found in security realm");
+        }
+    }
+
+    private String extractTokenFromHeader(Object token, ContextHandler contextHandler) {
+        String username = null;
+        if (contextHandler != null && contextHandler.isKeyAvailable("com.bea.contextelement.servlet.HttpServletRequest")) {
+            Object request = contextHandler.getValue("com.bea.contextelement.servlet.HttpServletRequest");
+            if (request instanceof javax.servlet.http.HttpServletRequest) {
+                username = ((javax.servlet.http.HttpServletRequest) request).getHeader(headerName);
             }
         }
-
-        // Checking we got the right kind of token
-        if (!"CustomRealmToken".equals(type)) {
-            String str3 =
-                "CustomRealmIdentityAsserterImpl received unknown token type \"" + type + "\"." + " Expected " +
-                "CustomRealmToken";
-
-
-            System.out.println("\tError: " + str3);
-            String str4 = new String((byte[]) token);
-            System.out.println("\tError: " + str4);
-
-            return null;
+        if (debugEnabled) {
+            logger.debug("Header " + headerName + " value: " + username);
         }
+        return username;
+    }
 
-        // Setting Assertion HashMap
-        HashMap<String, Object> hashMap = new HashMap<String, Object>();
-        hashMap.put("IdentityAssertion", "true");
-        getConfiguration(hashMap);
-
-        // Checking Token exists
-        if (!(token instanceof byte[])) {
-            String str =
-                "CustomRealmIdentityAsserterImpl received unknown token class \"" + token.getClass() + "\"." +
-                " Expected a byte[].";
-
-            System.out.println("\tError: " + str);
-            return null;
-        }
-
-        // Extract Token
-        System.out.println("\tToken: " + token.toString());
-        byte[] arrayOfByte = (byte[]) token;
-        
-        // Checking Token is valid
-        if (arrayOfByte == null || arrayOfByte.length < 1) {
-            String str = "CustomRealmIdentityAsserterImpl received empty token byte array";
-
-            System.out.println("\tError: " + str);
-            return null;
-        }
-
-        String tokenStr = new String(arrayOfByte);
-
-        if (!tokenStr.startsWith("username=")) {
-            String str =
-                "CustomRealmIdentityAsserterImpl received unknown token string \"" + type + "\"." + " Expected " +
-                "username=" + "username";
-
-            System.out.println("\tError: " + str);
-            return null;
-        }
-
-
-        String tokenValue = tokenStr.substring("username=".length());
-        System.out.println("\tuserName\t= " + tokenValue);
-
-        // Trying to fetch user from the DB
+    private boolean validateUserInRealm(String username) {
         try {
-            // CreatedFontTracker a driver
-            DriverManager.registerDriver((Driver) new OracleDriver());
-
-            // Get DB connection
-            Connection connection =
-                DriverManager.getConnection(this._mBean.getDbURL(), this._mBean.getDbUser(),
-                                            this._mBean.getDbPassword());
-            // Getting SQL query
-            String queryString = this._mBean.getDbTokenSql();
-
-            PreparedStatement preparedStatement = connection.prepareStatement(queryString);
-            preparedStatement.setString(1, tokenValue);
-            
-            // Querying the DB
-            ResultSet resultSet = preparedStatement.executeQuery();
-
-            String user = "";
-            boolean bool = false;
-            while (resultSet.next()) {
-
-                user = resultSet.getString(1);
-
-                System.out.println("username : " + user);
-                bool = true;
+            SecurityServiceManager securityServiceManager = SecurityServiceManager.getInstance();
+            boolean isValid = securityServiceManager.isUserValid("myrealm", username);
+            if (debugEnabled) {
+                logger.debug("Realm validation for user " + username + ": " + isValid);
             }
-
-            if (bool) {
-                return new CustomRealmCallbackHandlerImpl(user);
+            return isValid;
+        } catch (Exception e) {
+            if (debugEnabled) {
+                logger.debug("Error validating user " + username + ": " + e.getMessage());
             }
-
-            String str5 = "Invalid username token, token not found in users database ";
-
-            System.out.println("\tError: " + str5);
-            return null;
-        } catch (Exception exception) {
-
-            exception.printStackTrace();
-            String str = "database error ";
-
-            System.out.println("\tError: " + str);
-            return null;
+            return false;
         }
     }
 
-    public AppConfigurationEntry getLoginModuleConfiguration() {
-        System.out.println("CustomRealmIdentityAsserterImpl: getConfiguration of non Assertion!!! ");
-
-        HashMap<String, Object> hashMap = new HashMap<String, Object>();
-        hashMap.put("IdentityAssertion", "false");
-        return getConfiguration(hashMap);
+    @Override
+    public String getHeaderName() {
+        return headerName;
     }
 
-    private AppConfigurationEntry getConfiguration(HashMap<String, ?> paramHashMap) {
-        System.out.println("CustomRealmIdentityAsserterImpl: getConfiguration");
-
-        return new AppConfigurationEntry("com.oracle.il.css.CustomRealmLoginModuleImpl", this.controlFlag,
-                                         paramHashMap);
+    @Override
+    public void setHeaderName(String headerName) {
+        this.headerName = headerName;
+        if (debugEnabled) {
+            logger.debug("Header name set to: " + headerName);
+        }
     }
 
-    public AppConfigurationEntry getAssertionModuleConfiguration() {
-        System.out.println("CustomRealmIdentityAsserterImpl: getAssertionModuleConfiguration");
-
-        HashMap<String, Object> hashMap = new HashMap<String, Object>();
-
-        hashMap.put("IdentityAssertion", "false");
-        return getConfiguration(hashMap);
+    @Override
+    public boolean isDebugEnabled() {
+        return debugEnabled;
     }
 
-    public PrincipalValidator getPrincipalValidator() {
-        return (PrincipalValidator) new PrincipalValidatorImpl();
+    @Override
+    public void setDebugEnabled(boolean debugEnabled) {
+        this.debugEnabled = debugEnabled;
+        if (debugEnabled) {
+            logger.debug("Debug flag set to: " + debugEnabled);
+        }
     }
 }

@@ -41,6 +41,10 @@ public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, Id
         return description;
     }
 
+    public boolean getBase64DecodingRequired() {
+        return false;
+    }
+
     public AppConfigurationEntry getLoginModuleConfiguration() {
         return null; // No login module required for identity assertion
     }

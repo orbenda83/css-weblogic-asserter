@@ -37,7 +37,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     private String description = "Custom Identity Asserter for Realm Validation";
     private AppConfigurationEntry.LoginModuleControlFlag controlFlag;
     private CustomRealmIdentityAsserterMBean _mBean = null;
-    private NonCatalogLogger logger = NonCatalogLogger.getLogger("CustomRealmIdentityAsserterProviderImpl");
+    private NonCatalogLogger logger = new NonCatalogLogger("CustomRealmIdentityAsserterProviderImpl");
 
     public CustomRealmIdentityAsserterProviderImpl() {
         logger.debug("Initializing CustomRealmIdentityAsserterProviderImpl with headerName: " + headerName);

@@ -1,0 +1,22 @@
+<!--
+    commo.dtd - DTD for WebLogic MBeanType definitions
+    This is a minimal version for local validation.
+-->
+<!ELEMENT MBeanType (MBeanAttribute*)>
+<!ATTLIST MBeanType
+    Name CDATA #REQUIRED
+    DisplayName CDATA #IMPLIED
+    Package CDATA #REQUIRED
+    Extends CDATA #IMPLIED
+    PersistPolicy CDATA #IMPLIED
+>
+
+<!ELEMENT MBeanAttribute EMPTY>
+<!ATTLIST MBeanAttribute
+    Name CDATA #REQUIRED
+    Type CDATA #REQUIRED
+    Writeable (true|false) "true"
+    Preprocessor CDATA #IMPLIED
+    Default CDATA #IMPLIED
+    DisplayName CDATA #IMPLIED
+> 

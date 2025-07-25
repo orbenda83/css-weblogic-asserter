@@ -20,22 +20,22 @@ import weblogic.logging.NonCatalogLogger;
 import javax.servlet.http.HttpServletRequest;
 
 
-public final class CustomRealmIdentityAsserterImpl implements AuthenticationProviderV2, IdentityAsserterV2 {
+public final class CustomRealmIdentityAsserterProviderImpl implements AuthenticationProviderV2, IdentityAsserterV2 {
     private String headerName = "X-User-Id";
     private boolean debugEnabled = false;
     private String description = "Custom Identity Asserter for Realm Validation";
     private AppConfigurationEntry.LoginModuleControlFlag controlFlag;
     private CustomRealmIdentityAsserterMBean _mBean = null;
 
-    public CustomRealmIdentityAsserterImpl() {
-        this.logger = new NonCatalogLogger("CustomRealmIdentityAsserterImpl");
+    public CustomRealmIdentityAsserterProviderImpl() {
+        this.logger = new NonCatalogLogger("CustomRealmIdentityAsserterProviderImpl");
         if (debugEnabled) {
-            logger.debug("Initializing CustomRealmIdentityAsserterImpl with headerName: " + headerName);
+            logger.debug("Initializing CustomRealmIdentityAsserterProviderImpl with headerName: " + headerName);
         }
     }
 
     public void initialize(ProviderMBean mbean, SecurityServices services) {
-        System.out.println("CustomRealmIdentityAsserterImpl.initialize");
+        System.out.println("CustomRealmIdentityAsserterProviderImpl.initialize");
         CustomRealmIdentityAsserterMBean myMBean = (CustomRealmIdentityAsserterMBean) mbean;
         this._mBean = myMBean;
         description = myMBean.getDescription() + "\n" + myMBean.getVersion();
@@ -47,7 +47,7 @@ public final class CustomRealmIdentityAsserterImpl implements AuthenticationProv
     }
 
     public void shutdown() {
-        System.out.println("CustomRealmIdentityAsserterImpl.shutdown");
+        System.out.println("CustomRealmIdentityAsserterProviderImpl.shutdown");
     }
 
     public IdentityAsserterV2 getIdentityAsserter() {

@@ -32,6 +32,9 @@ public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, Id
     public String getName() {
         return "CustomRealmIdentityAsserter";
     }
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public boolean getDebugEnabled() {
         return debugEnabled;
@@ -43,6 +46,10 @@ public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, Id
 
     public boolean getBase64DecodingRequired() {
         return false;
+    }
+
+    public void setActiveTypes(String[] activeTypes) {
+        this.activeTypes = activeTypes;
     }
 
     public String[] getActiveTypes() {

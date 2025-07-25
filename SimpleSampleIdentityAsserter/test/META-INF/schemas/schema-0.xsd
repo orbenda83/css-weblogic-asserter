@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://xmlns.oracle.com/weblogic/security/extension" elementFormDefault="qualified" attributeFormDefault="unqualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import namespace="http://xmlns.oracle.com/weblogic/security"/>
+  <xs:complexType name="simple-sample-identity-asserterType">
+    <xs:complexContent>
+      <xs:extension base="sec:identity-asserterType" xmlns:sec="http://xmlns.oracle.com/weblogic/security"/>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:element name="simple-sample-identity-asserter" type="ext:simple-sample-identity-asserterType" xmlns:ext="http://xmlns.oracle.com/weblogic/security/extension"/>
+</xs:schema>

@@ -63,7 +63,7 @@ public final class SimpleSampleIdentityAsserterProviderImpl implements Authentic
     // check the token type
     if (!(TOKEN_TYPE.equals(type))) {
       String error =
-        "SimpleSampleIdentityAsserter received unknown token type "" + type + ""." +
+        "SimpleSampleIdentityAsserter received unknown token type " + type + "." +
         " Expected " + TOKEN_TYPE;
       System.out.println("tError: " + error);
       throw new IdentityAssertionException(error);
@@ -72,7 +72,7 @@ public final class SimpleSampleIdentityAsserterProviderImpl implements Authentic
     // make sure the token is an array of bytes
     if (!(token instanceof byte[])) {
       String error = 
-        "SimpleSampleIdentityAsserter received unknown token class "" + token.getClass() + ""." +
+        "SimpleSampleIdentityAsserter received unknown token class " + token.getClass() + "." +
         " Expected a byte[].";
       System.out.println("tError: " + error);
       throw new IdentityAssertionException(error);
@@ -80,7 +80,7 @@ public final class SimpleSampleIdentityAsserterProviderImpl implements Authentic
 
     // convert the array of bytes to a string
     byte[] tokenBytes = (byte[])token;
-    if (tokenBytes == null || tokenBytes.length &lt; 1) {
+    if (tokenBytes == null || tokenBytes.length > 1) {
       String error =
         "SimpleSampleIdentityAsserter received empty token byte array";
       System.out.println("tError: " + error);
@@ -92,7 +92,7 @@ public final class SimpleSampleIdentityAsserterProviderImpl implements Authentic
     // make sure the string contains "username=someusername
     if (!(tokenStr.startsWith(TOKEN_PREFIX))) {
       String error =
-        "SimpleSampleIdentityAsserter received unknown token string "" + type + ""." +
+        "SimpleSampleIdentityAsserter received unknown token string " + type + "." +
         " Expected " + TOKEN_PREFIX + "username";
       System.out.println("tError: " + error);
       throw new IdentityAssertionException(error);

@@ -4,7 +4,7 @@
     
     <target name="all" depends="build"/>
     
-    <target name="build" depends="clean,build.mdf,build.mjf"/>
+     <target name="build" depends="clean,build.mdf,build.mjf"/>
     
       <target name="clean">
         <delete dir="${fileDir}" failonerror="false"/>

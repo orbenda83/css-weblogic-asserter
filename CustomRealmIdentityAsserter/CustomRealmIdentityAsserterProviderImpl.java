@@ -1,7 +1,6 @@
 package com.oracle.il.css;
 
 import java.security.Principal;
-import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
@@ -10,10 +9,11 @@ import javax.servlet.http.HttpServletRequest;
 
 import weblogic.logging.NonCatalogLogger;
 import weblogic.management.security.ProviderMBean;
+import weblogic.management.security.RealmMBean;
 import weblogic.security.auth.callback.IdentityDomainUserCallback;
 import weblogic.security.principal.WLSUserImpl;
+import weblogic.security.provider.PrincipalValidatorImpl;
 import weblogic.security.service.ContextHandler;
-import weblogic.security.service.SecurityServiceManager;
 import weblogic.security.spi.AuthenticationProviderV2;
 import weblogic.security.spi.IdentityAsserterV2;
 import weblogic.security.spi.IdentityAssertionException;
@@ -36,18 +36,16 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         logger.debug("CustomRealmIdentityAsserterProviderImpl.initialize");
         CustomRealmIdentityAsserterMBean myMBean = (CustomRealmIdentityAsserterMBean) mbean;
         
-        // Get configuration from the MBean
         this.headerName = myMBean.getHeaderName();
-        this.debugEnabled = myMBean.isDebugEnabled(); // This now works after fixing the XML
+        this.debugEnabled = myMBean.getDebugEnabled(); // Use getDebugEnabled()
         this.description = myMBean.getDescription() + "\n" + myMBean.getVersion();
         
-        // FIX #3: Get the PrincipalValidator from the SecurityServiceManager for the realm
-        this.principalValidator = SecurityServiceManager.getPrincipalValidator(myMBean.getRealm());
+        // FIX #3 & #4: For older WLS, just instantiate the default validator
+        this.principalValidator = new PrincipalValidatorImpl();
     }
 
     @Override
     public PrincipalValidator getPrincipalValidator() {
-        // This is still required, but we will use the one from SecurityServiceManager
         return this.principalValidator;
     }
 
@@ -56,10 +54,9 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         return this;
     }
 
-    // FIX #1: Implement the required getAssertionModuleConfiguration method
+    // FIX #1 & #2: Fix the method signature for older WLS
     @Override
-    public AppConfigurationEntry[] getAssertionModuleConfiguration() {
-        // Return null if no special JAAS module configuration is needed
+    public AppConfigurationEntry getAssertionModuleConfiguration() {
         return null;
     }
 
@@ -75,29 +72,28 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
 
     @Override
     public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler) throws IdentityAssertionException {
-        // The token "type" should be the name of the header
-        if (!type.equalsIgnoreCase(this.headerName)) {
-            if (debugEnabled) {
-                logger.debug("Token type " + type + " does not match configured header " + this.headerName);
-            }
-            return null; // Not our token type, let other asserters try
+        // In older WLS, the token is often the HttpServletRequest itself
+        if (!(token instanceof HttpServletRequest)) {
+            return null; // Cannot handle this token type
         }
-        
-        String username = extractTokenFromHeader(token, contextHandler);
+
+        HttpServletRequest request = (HttpServletRequest) token;
+        final String username = request.getHeader(this.headerName);
+
         if (username == null || username.isEmpty()) {
-            throw new IdentityAssertionException("No username provided in header: " + this.headerName);
+             // It's better to return null to allow other providers to try
+            return null;
         }
 
         if (debugEnabled) {
-            logger.debug("Extracted username: " + username);
+            logger.debug("assertIdentity found user '" + username + "' in header '" + this.headerName + "'");
         }
         
-        // Create the principal object for validation
         final Principal userPrincipal = new WLSUserImpl(username);
         
         if (validateUserInRealm(userPrincipal)) {
             if (debugEnabled) {
-                logger.debug("User " + username + " validated successfully. Returning callback handler.");
+                logger.debug("User '" + username + "' validated successfully.");
             }
             
             return new CallbackHandler() {
@@ -105,8 +101,8 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
                     for (Callback callback : callbacks) {
                         if (callback instanceof IdentityDomainUserCallback) {
                             IdentityDomainUserCallback iduc = (IdentityDomainUserCallback) callback;
-                            // FIX #4: Pass the Principal to the callback
-                            iduc.setUser(userPrincipal);
+                            // FIX #6: Pass the username String to the callback
+                            iduc.setUser(username);
                         } else {
                             throw new UnsupportedCallbackException(callback, "Unrecognized Callback");
                         }
@@ -115,32 +111,19 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             };
         } else {
             if (debugEnabled) {
-                logger.debug("User " + username + " not found in security realm or is invalid.");
+                logger.debug("User '" + username + "' was not found in the security realm.");
             }
-            throw new IdentityAssertionException("User '" + username + "' not found in security realm or is invalid.");
+            throw new IdentityAssertionException("User '" + username + "' not found in security realm.");
         }
-    }
-
-    private String extractTokenFromHeader(Object token, ContextHandler contextHandler) {
-        if (token instanceof HttpServletRequest) {
-            return ((HttpServletRequest) token).getHeader(this.headerName);
-        }
-        return null;
     }
 
     private boolean validateUserInRealm(Principal principal) {
         try {
-            if (debugEnabled) {
-                logger.debug("Validating user '" + principal.getName() + "' using PrincipalValidator.");
-            }
-            // FIX #5: Use the correct 'validate' method signature
-            if (this.principalValidator.validate(principal)) {
-                return true; // The user is valid
-            }
-            return false;
+            // The default validator's validate() returns boolean
+            return this.principalValidator.validate(principal);
         } catch (Exception e) {
             if (debugEnabled) {
-                logger.debug("Error validating user '" + principal.getName() + "': " + e.getMessage());
+                logger.debug("Exception during principal validation for " + principal.getName() + ": " + e.getMessage());
             }
             return false;
         }

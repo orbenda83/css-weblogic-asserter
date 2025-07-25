@@ -111,7 +111,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     private AppConfigurationEntry getConfiguration(HashMap<String, ?> paramHashMap) {
         System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration");
 
-        return new AppConfigurationEntry("com.oracle.il.css.CustomRealmLoginModuleImpl", this.controlFlag,
+        return new AppConfigurationEntry("com.oracle.il.css.CustomRealmLoginModuleImpl", AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT,
                                          paramHashMap);
     }
 }

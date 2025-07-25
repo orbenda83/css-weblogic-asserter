@@ -1,7 +1,10 @@
 package com.oracle.il.css;
 
+import java.security.Principal;
 import javax.security.auth.Subject;
+import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.servlet.http.HttpServletRequest;
 
@@ -9,7 +12,6 @@ import weblogic.logging.NonCatalogLogger;
 import weblogic.management.security.ProviderMBean;
 import weblogic.security.auth.callback.IdentityDomainUserCallback;
 import weblogic.security.principal.WLSUserImpl;
-import weblogic.security.provider.PrincipalValidatorImpl;
 import weblogic.security.service.ContextHandler;
 import weblogic.security.service.SecurityServiceManager;
 import weblogic.security.spi.AuthenticationProviderV2;
@@ -17,17 +19,13 @@ import weblogic.security.spi.IdentityAsserterV2;
 import weblogic.security.spi.IdentityAssertionException;
 import weblogic.security.spi.PrincipalValidator;
 import weblogic.security.spi.SecurityServices;
-import javax.security.auth.callback.Callback;
-import javax.security.auth.callback.UnsupportedCallbackException;
 
 public final class CustomRealmIdentityAsserterProviderImpl implements AuthenticationProviderV2, IdentityAsserterV2 {
-    private String headerName = "X-User-Id";
-    private boolean debugEnabled = false;
-    private String description = "Custom Identity Asserter for Realm Validation";
-    private AppConfigurationEntry.LoginModuleControlFlag controlFlag;
-    private CustomRealmIdentityAsserterMBean _mBean;
+    private String headerName;
+    private boolean debugEnabled;
+    private String description;
+    private PrincipalValidator principalValidator;
     private NonCatalogLogger logger = new NonCatalogLogger("CustomRealmIdentityAsserterProviderImpl");
-    private PrincipalValidator principalValidator; // To store the validator
 
     public CustomRealmIdentityAsserterProviderImpl() {
         logger.debug("Initializing CustomRealmIdentityAsserterProviderImpl");
@@ -36,23 +34,21 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     @Override
     public void initialize(ProviderMBean mbean, SecurityServices services) {
         logger.debug("CustomRealmIdentityAsserterProviderImpl.initialize");
-        this._mBean = (CustomRealmIdentityAsserterMBean) mbean;
-
-        // Use the MBean to get configuration
-        this.headerName = this._mBean.getHeaderName();
-        this.debugEnabled = this._mBean.isDebugEnabled();
-        this.description = this._mBean.getDescription() + "\n" + this._mBean.getVersion();
-
-        this.controlFlag = AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT;
-        // Get the principal validator from the security services
-        this.principalValidator = services.getPrincipalValidator();
+        CustomRealmIdentityAsserterMBean myMBean = (CustomRealmIdentityAsserterMBean) mbean;
+        
+        // Get configuration from the MBean
+        this.headerName = myMBean.getHeaderName();
+        this.debugEnabled = myMBean.isDebugEnabled(); // This now works after fixing the XML
+        this.description = myMBean.getDescription() + "\n" + myMBean.getVersion();
+        
+        // FIX #3: Get the PrincipalValidator from the SecurityServiceManager for the realm
+        this.principalValidator = SecurityServiceManager.getPrincipalValidator(myMBean.getRealm());
     }
 
-    // --- FIX #1: Implement the required getPrincipalValidator method ---
     @Override
     public PrincipalValidator getPrincipalValidator() {
-        // A simple PrincipalValidator is usually sufficient.
-        return new PrincipalValidatorImpl();
+        // This is still required, but we will use the one from SecurityServiceManager
+        return this.principalValidator;
     }
 
     @Override
@@ -60,9 +56,16 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         return this;
     }
 
+    // FIX #1: Implement the required getAssertionModuleConfiguration method
+    @Override
+    public AppConfigurationEntry[] getAssertionModuleConfiguration() {
+        // Return null if no special JAAS module configuration is needed
+        return null;
+    }
+
     @Override
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     @Override
@@ -71,59 +74,39 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     }
 
     @Override
-    public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler)
-            throws IdentityAssertionException {
-        if (debugEnabled) {
-            logger.debug("assertIdentity called with type: " + type);
-        }
-
-        // The "type" for an Identity Asserter is the token name from the provider
-        // configuration
-        // In this case, it should match the active token type in the WebLogic console.
-        // We will assume it's configured to be the header name for simplicity.
-        if (!type.equals(this.headerName)) {
+    public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler) throws IdentityAssertionException {
+        // The token "type" should be the name of the header
+        if (!type.equalsIgnoreCase(this.headerName)) {
             if (debugEnabled) {
-                logger.debug("Token type " + type + " is not the configured active token type for this provider.");
+                logger.debug("Token type " + type + " does not match configured header " + this.headerName);
             }
-            // Return null to indicate we are not handling this token type
-            return null;
+            return null; // Not our token type, let other asserters try
         }
-
+        
         String username = extractTokenFromHeader(token, contextHandler);
-
         if (username == null || username.isEmpty()) {
-            // No user in the header, so we don't assert an identity.
-            // Throwing an exception might be too aggressive if other asserters should try.
-            // Returning null is often better. For this example, we'll stick to the
-            // exception.
-            throw new IdentityAssertionException("No username provided in header: " + headerName);
+            throw new IdentityAssertionException("No username provided in header: " + this.headerName);
         }
 
         if (debugEnabled) {
             logger.debug("Extracted username: " + username);
         }
-
-        // --- FIX #4 & #5: Use the PrincipalValidator ---
-        boolean isValid = validateUserInRealm(username);
-
-        if (isValid) {
+        
+        // Create the principal object for validation
+        final Principal userPrincipal = new WLSUserImpl(username);
+        
+        if (validateUserInRealm(userPrincipal)) {
             if (debugEnabled) {
                 logger.debug("User " + username + " validated successfully. Returning callback handler.");
             }
-
-            // Create the subject for the validated user
-            final Subject userSubject = new Subject();
-            userSubject.getPrincipals().add(new WLSUserImpl(username));
-
-            // Return a new CallbackHandler that provides the user Subject when asked.
-            // This is the modern, compatible way to achieve impersonation.
+            
             return new CallbackHandler() {
                 public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
-                    for (int i = 0; i < callbacks.length; i++) {
-                        Callback callback = callbacks[i];
+                    for (Callback callback : callbacks) {
                         if (callback instanceof IdentityDomainUserCallback) {
                             IdentityDomainUserCallback iduc = (IdentityDomainUserCallback) callback;
-                            iduc.setUser(userSubject);
+                            // FIX #4: Pass the Principal to the callback
+                            iduc.setUser(userPrincipal);
                         } else {
                             throw new UnsupportedCallbackException(callback, "Unrecognized Callback");
                         }
@@ -139,56 +122,27 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     }
 
     private String extractTokenFromHeader(Object token, ContextHandler contextHandler) {
-        String username = null;
-        // --- FIX #3: Check for the key correctly ---
-        if (contextHandler != null) {
-            Object requestObj = contextHandler.getValue("com.bea.contextelement.servlet.HttpServletRequest");
-            if (requestObj instanceof HttpServletRequest) {
-                username = ((HttpServletRequest) requestObj).getHeader(headerName);
-            }
+        if (token instanceof HttpServletRequest) {
+            return ((HttpServletRequest) token).getHeader(this.headerName);
         }
-        if (debugEnabled) {
-            logger.debug("Header " + headerName + " value: " + username);
-        }
-        return username;
+        return null;
     }
 
-    private boolean validateUserInRealm(String username) {
+    private boolean validateUserInRealm(Principal principal) {
         try {
             if (debugEnabled) {
-                logger.debug("Validating user '" + username + "' using PrincipalValidator.");
+                logger.debug("Validating user '" + principal.getName() + "' using PrincipalValidator.");
             }
-            Subject userSubject = new Subject();
-            userSubject.getPrincipals().add(new WLSUserImpl(username));
-
-            // Use the PrincipalValidator to check if the user is valid in the realm
-            this.principalValidator.validate(userSubject, null);
-
-            // If validate() does not throw an exception, the user is considered valid.
-            return true;
+            // FIX #5: Use the correct 'validate' method signature
+            if (this.principalValidator.validate(principal)) {
+                return true; // The user is valid
+            }
+            return false;
         } catch (Exception e) {
             if (debugEnabled) {
-                logger.debug("Error validating user '" + username + "': " + e.getMessage());
+                logger.debug("Error validating user '" + principal.getName() + "': " + e.getMessage());
             }
             return false;
         }
-    }
-
-    // --- FIX #6: Remove @Override from custom methods not in the interfaces ---
-
-    public String getHeaderName() {
-        return headerName;
-    }
-
-    public void setHeaderName(String headerName) {
-        this.headerName = headerName;
-    }
-
-    public boolean isDebugEnabled() {
-        return debugEnabled;
-    }
-
-    public void setDebugEnabled(boolean debugEnabled) {
-        this.debugEnabled = debugEnabled;
     }
 }

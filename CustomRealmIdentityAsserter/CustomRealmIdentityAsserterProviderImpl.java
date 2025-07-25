@@ -6,7 +6,6 @@ import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.servlet.http.HttpServletRequest;
-import javax.security.auth.callback.UserCallback;
 
 import weblogic.logging.NonCatalogLogger;
 import weblogic.management.security.ProviderMBean;
@@ -89,8 +88,8 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
                 public void handle(Callback[] callbacks) throws UnsupportedCallbackException {
                     for (Callback callback : callbacks) {
                         // FIX #2: Use the older, simpler UserCallback
-                        if (callback instanceof UserCallback) {
-                            UserCallback uc = (UserCallback) callback;
+                        if (callback instanceof Callback) {
+                            Callback uc = (Callback) callback;
                             uc.setUser(username);
                         } else {
                             throw new UnsupportedCallbackException(callback, "Unrecognized Callback, expected UserCallback");

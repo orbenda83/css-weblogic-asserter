@@ -1,0 +1,329 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <!--
+        Oracle WebLogic MBean Maker Maven Build
+        - {weblogic.home} should point to the server installation
+        - {bea.modules} is expected to hold the weblogic "shared" jars
+        - sources are expected to live under 'src' folder
+        - the src folder is expected to contain the BguIdentityAsserter.xml
+          (change it based on Your needs - should be the mbean XML)
+        - the build is working under WL 12.2.1.4 for other versions
+          You might need to adjust the WL "modules" jar versions !
+     -->
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>il.bgu.ac.it.identityassertion</groupId>
+    <artifactId>BguIdentityAsserter</artifactId>
+    <version>1.0</version>
+    <name>bgu_identity_asserter</name>
+    
+    <properties>
+      <weblogic.home>C:\Oracle\Oracle12\Middleware\Oracle_Home\wlserver</weblogic.home>
+        <!--<weblogic.home>${env.BEA_HOME}/wlserver_10.3</weblogic.home>-->
+        <bea.modules>${weblogic.home}/modules</bea.modules>
+        <java.home>C:\Program Files\Java\jdk1.8.0_221\bin</java.home>
+
+        <com.bea.core.i18n.version>1.6.0.0</com.bea.core.i18n.version>
+        <com.bea.core.weblogic.security.version>1.0.0.0_5-2-0-0</com.bea.core.weblogic.security.version>
+        <com.bea.core.beaninfo.version>2.4.0.0</com.bea.core.beaninfo.version>
+        <com.bea.core.utils.full.version>1.7.0.0</com.bea.core.utils.full.version>
+        <com.bea.core.utils.classloaders.version>1.6.0.0</com.bea.core.utils.classloaders.version>
+        <com.bea.core.descriptor.version>1.7.0.0</com.bea.core.descriptor.version>
+        <com.bea.core.common.security.api.version>1.0.0.0_5-2-0-0</com.bea.core.common.security.api.version>
+        <com.bea.core.weblogic.security.identity.version>1.1.2.0</com.bea.core.weblogic.security.identity.version>
+        <com.bea.core.mbean.maker.version>1.4.0.0</com.bea.core.mbean.maker.version>
+        <com.bea.core.management.core.version>2.5.0.0</com.bea.core.management.core.version>
+        <com.bea.core.logging.version>1.6.0.0</com.bea.core.logging.version>
+        <com.bea.core.weblogic.workmanager.version>1.7.0.0</com.bea.core.weblogic.workmanager.version>
+        <com.bea.core.apache.commons.collections.version>3.2.0</com.bea.core.apache.commons.collections.version>
+        <com.bea.core.apache.commons.pool.version>1.3.0</com.bea.core.apache.commons.pool.version>
+        <com.bea.core.apache.log4j.version>1.2.13</com.bea.core.apache.log4j.version>
+
+        <project.build.sourceDirectory></project.build.sourceDirectory>
+        <mbean.generated.source.dir>${project.build.directory}/mbean-gen</mbean.generated.source.dir>
+        <!--<weblogic.mbeans.dir>${env.DOMAIN_HOME}/weblogic/mbeans</weblogic.mbeans.dir>-->
+    </properties>
+
+    
+    <dependencies>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>weblogic</artifactId>
+            <version>12.2.1.4</version>
+            <scope>system</scope>
+            <systemPath>${weblogic.home}/server/lib/weblogic.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.i18n</artifactId>
+            <version>${com.bea.core.i18n.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.i18n.tools.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.weblogic.security</artifactId>
+            <version>${com.bea.core.weblogic.security.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.oracle.weblogic.security.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.beaninfo</artifactId>
+            <version>${com.bea.core.beaninfo.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.beaninfo.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.utils.full</artifactId>
+            <version>${com.bea.core.utils.full.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.utils.full.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.utils.classloaders</artifactId>
+            <version>${com.bea.core.utils.classloaders.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.utils.classloaders.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.descriptor</artifactId>
+            <version>${com.bea.core.descriptor.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.descriptor.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.common.security.api</artifactId>
+            <version>${com.bea.core.common.security.api.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.oracle.weblogic.management.security.api.jar</systemPath>
+        </dependency>
+        <!--<dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.weblogic.security.identity</artifactId>
+            <version>${com.bea.core.weblogic.security.identity.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.weblogic.security.identity_${com.bea.core.weblogic.security.identity.version}.jar</systemPath>
+        </dependency>-->
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.mbean.maker</artifactId>
+            <version>${com.bea.core.mbean.maker.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.mbean.maker.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.management.core</artifactId>
+            <version>${com.bea.core.management.core.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.management.core.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.logging</artifactId>
+            <version>${com.bea.core.logging.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.oracle.weblogic.logging.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.weblogic.workmanager</artifactId>
+            <version>${com.bea.core.weblogic.workmanager.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.weblogic.workmanager.jar</systemPath>
+        </dependency>
+        <!--<dependency>
+            --><!--
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.0</version>--><!--
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.apache.commons.collections</artifactId>
+            <version>${com.bea.core.apache.commons.collections.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.apache.commons.collections_${com.bea.core.apache.commons.collections.version}.jar</systemPath>
+        </dependency>-->
+        <dependency>
+            <!--
+            <groupId>commons-pool</groupId>
+            <artifactId>commons-pool</artifactId>
+            <version>1.3.0</version>-->
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.apache.commons.pool</artifactId>
+            <version>${com.bea.core.apache.commons.pool.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.apache.commons.pool.jar</systemPath>
+        </dependency>
+        <dependency>
+            <!--
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.13</version>-->
+            <groupId>weblogic</groupId>
+            <artifactId>com.bea.core.apache.log4j</artifactId>
+            <version>${com.bea.core.apache.log4j.version}</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.bea.core.repackaged.apache.commons.logging.jar</systemPath>
+        </dependency>
+
+        <dependency>
+            <groupId>com.sun</groupId>
+            <artifactId>tools</artifactId>
+            <version>1.8.0</version>
+            <scope>system</scope>
+            <systemPath>${java.home}/../lib/tools.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>weblogic</groupId>
+            <artifactId>weblogic.security</artifactId>
+            <version>12.2.1.4</version>
+            <scope>system</scope>
+            <systemPath>${bea.modules}/com.oracle.weblogic.security.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>BguIdentityAsserter</finalName>
+        <sourceDirectory>src</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>${project.build.sourceDirectory}</directory>
+                <includes>
+                    <include>BguIdentityAsserter.xml</include>
+                    <!--
+                    <include>BguAsserter.properties</include>-->
+                </includes>
+            </resource>
+            <resource>
+                <directory>${mbean.generated.source.dir}</directory>
+                <includes>
+                    <include>META-INF/MANIFEST.MF</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <useDefaultManifestFile>true</useDefaultManifestFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>run-mbean-maker</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <property name="src_dir" value="${project.build.sourceDirectory}"/>
+                                <echo>${project.build.sourceDirectory}</echo>
+                                <!--<property name="src_dir" value="${project.build.sourceDirectory}\..\..\src"/>
+                                <echo>${src_dir}</echo>-->
+                                <property name="mbean_gen_dir" value="${mbean.generated.source.dir}"/>
+                                <property name="mbean_out_dir" value="${project.build.directory}/mbean-out"/>
+                                <property name="mjf_jar" value="${build.directory}/${build.finalName}.jar"/>
+                                <property name="mdf_xml" value="BguIdentityAsserter.xml"/>
+                                
+                                <!-- ensure that WebLogicMBeanMaker starts from a clean slate -->
+                                <delete dir="${mbean_gen_dir}"/> <mkdir dir="${mbean_gen_dir}"/>
+                                <delete dir="${mbean_out_dir}"/> <mkdir dir="${mbean_out_dir}"/>
+                                
+                                <!-- copy **.xml to the generated source directory or it won't work -->
+                                <copy todir="${mbean_gen_dir}" flatten="true">
+                                    <fileset dir="${src_dir}">
+                                        <include name="**/*.xml"/> <!-- the asserter .xml -->
+                                    </fileset>
+                                </copy>
+                                
+                                <!-- the MBeanMaker expects commo.dtd in the same dir as the XML : -->
+                                <copy todir="${mbean_gen_dir}" file="${weblogic.home}/server/lib/commo.dtd"/>
+                                <path id="mbeanmaker.path">
+                                    <pathelement path="${mbean_gen_dir}"/>
+                                    <path refid="maven.compile.classpath"/>
+                                </path>
+                                
+                                <!-- Build the MDFs (mbean definition files) for the authenticator : -->
+                                <java classname="weblogic.management.commo.WebLogicMBeanMaker"
+                                      classpathref="mbeanmaker.path" fork="false" failonerror="true">
+                                    <arg line="-MDF ${mbean_gen_dir}/${mdf_xml}"/>
+                                    <arg line="-files ${mbean_gen_dir} -createStubs -verbose"/>
+                                </java>
+                                 Copy all sources and MDF generated files to one dir for MJF : 
+                                <copy todir="${mbean_out_dir}">
+                                    <fileset dir="${src_dir}" includes="**/*.java"/>
+                                    <fileset dir="${mbean_gen_dir}"/>
+                                </copy>
+                                 Build the MJF (mbean jar file) for the authenticator, also
+                                     generates a set of XML binding classes and a schema : 
+                                <java classname="weblogic.management.commo.WebLogicMBeanMaker"
+                                      classpathref="mbeanmaker.path" fork="true" failonerror="true">
+                                    <arg line="-MJF ${mjf_jar} -files ${mbean_out_dir} -g -verbose"/>
+                                </java>
+                                 NOTE: the "only" way to make maven compiler happy (the MBeanMaker
+                                     already compiled the generated sources) : 
+                                 WebLogic needs the MANIFEST.MF generated to validate java types
+                                     but the MANIFEST file is only present in the jar build by MJF :
+                                     
+                                <unjar src="${mjf_jar}" dest="${mbean_gen_dir}">
+                                    <patternset>
+                                        <include name="META-INF/MANIFEST.MF"/>
+                                    </patternset>
+                                </unjar>
+                                <copy todir="${project.build.outputDirectory}" includeEmptyDirs="false">
+                                    <fileset dir="${mbean_out_dir}">
+                                        <exclude name="**/*.java"/>
+                                    </fileset>
+                                </copy>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                    <!-- copy task that copies artifact to mbeans dir : -->
+                    <!-- to skip copying ... mvn install -Dskip.mbeans.copy=true -->
+                    <!--
+                    <execution>
+                        <id>copy-mbean-jar</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks unless="skip.mbeans.copy">
+                                <echo message="copying ${build.finalName}.jar to ${weblogic.mbeans.dir}"/>
+                                <copy file="${build.directory}/${build.finalName}.jar" todir="${weblogic.mbeans.dir}"/>
+                            </tasks>
+                        </configuration>
+                    </execution>-->
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- <id>add-source</id> -->
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${mbean.generated.source.dir}</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

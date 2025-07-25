@@ -1,0 +1,65 @@
+<HTML>
+
+<HEAD>
+
+<SCRIPT LANGUAGE = "Javascript">
+
+document.firstline = "redirect page"
+
+</SCRIPT>
+
+<TITLE>load demo</TITLE>
+
+<SCRIPT LANGUAGE ="Javascript">
+function init() 
+{
+
+        var location_st = window.location.href.toString();
+
+        if (location_st.indexOf("username=") > -1)
+
+        {
+
+                var username = location_st.substring(location_st.indexOf("username=") + 9);
+
+
+
+
+        }
+
+        else
+
+        {
+
+                return;
+
+        }
+
+        var req = new XMLHttpRequest();
+        req.open("GET", "/bpm/workspace/faces/jsf/worklist/worklist.jspx", false); 
+        req.setRequestHeader("SamplePerimeterAtnToken", "username="+username);
+
+        req.responseType="Document";
+
+        req.send();
+        navigateMe(); 
+}
+
+
+
+
+function navigateMe()
+
+{
+
+        window.location.href="http://testlinbpm1.bgu.ac.il:8001/bpm/workspace/faces/jsf/worklist/worklist.jspx";
+
+}
+
+</SCRIPT>
+
+</HEAD>
+
+<BODY onload="init()">
+
+</BODY>

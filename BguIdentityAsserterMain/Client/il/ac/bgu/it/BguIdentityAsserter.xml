@@ -1,0 +1,88 @@
+<?xml version="1.0" ?>
+<!DOCTYPE MBeanType SYSTEM "commo.dtd">
+
+<!-- MBean Definition File (MDF) for the BGU DB Identity Asserter.
+
+     Copyright (c) 2002 by BEA Systems, Inc.  All Rights Reserved.
+-->
+
+<!-- Declare your mbean.
+
+     Since it is for an identity asserter, it must extend the
+     weblogic.management.security.authentication.IdentityAsserter mbean.
+
+     The Name and DisplayName must be the same.
+     They specify the name that will appear on the
+     console for this provider.
+
+     Set the PeristPolicy to "OnUpdate" so that if an attribute
+     value is changed, the new value is written to disk immediately.
+     See the "Developing Security Services" manual for more info.
+
+     Note that since this is an xml document, you can't use double
+     quotes directly.  Instead you need to use &quot;
+
+     Note that setting "Writeable" to "false" on an attribute
+     makes the attribute read-only.  The default is read-write.
+-->
+
+<MBeanType
+ Name          = "BguIdentityAsserter"
+ DisplayName   = "BguIdentityAsserter"
+ Package       = "il.ac.bgu.it.identityassertion"
+ Extends       = "weblogic.management.security.authentication.IdentityAsserter"
+ Implements    = "weblogic.management.security.authentication.Authenticator"
+ PersistPolicy = "OnUpdate"
+>
+ 
+ <!-- You must set the value of the ProviderClassName attribute
+      (inherited from the weblogic.management.security.Provider mbean)
+      to the name of the java class you wrote that implements the
+      weblogic.security.spi.AuthenticationProvider interface.
+
+      You can think of the provider's mbean as the factory
+      for your provider's runtime implementation.
+ -->
+ <MBeanAttribute
+  Name          = "ProviderClassName"
+  Type          = "java.lang.String"
+  Writeable     = "false"
+  Preprocessor = "weblogic.management.configuration.LegalHelper.checkClassName(value)"
+  Default       = "&quot;il.ac.bgu.it.identityassertion.BguIdentityAsserterProviderImpl&quot;"
+ />
+ 
+ <MBeanAttribute
+  Name          = "Description"
+  Type          = "java.lang.String"
+  Writeable     = "false"
+  Default       = "&quot;WebLogic BGU Custom Identity Asserter Provider&quot;"
+ />
+ 
+ <MBeanAttribute
+  Name          = "Version"
+  Type          = "java.lang.String"
+  Writeable     = "false"
+  Default       = "&quot;1.0&quot;"
+ />
+ 
+ <MBeanAttribute 
+  Name      = "SupportedTypes"
+  Type      = "java.lang.String[]"
+  Writeable     = "false"
+  Default   = "new String[] { &quot;BguPerimeterAtnToken&quot; }"
+ />
+ 
+ <MBeanAttribute 
+  Name      = "ActiveTypes"
+  Type      = "java.lang.String[]"
+  Default   = "new String[] { &quot;BguPerimeterAtnToken&quot; }"
+ />
+ 
+   <MBeanAttribute 
+  Name      = "Base64DecodingRequired"
+  Type      = "boolean"
+  Writeable     = "true"
+  Default   = "false"
+ />
+ 
+</MBeanType>

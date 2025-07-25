@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <script language="Javascript">
+          document.firstline = "redirect page"
+        </script>
+        <title>BGU Asserter Load</title>
+        <script language="Javascript">
+          function init() {
+              var location_st = window.location.href.toString();
+              var date = new Date();
+              var fullUrl = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+              var bpmWorklist = "/bpm/workspace/faces/jsf/worklist/worklist.jspx";
+
+              if (location_st.indexOf("username=") >  - 1) {
+                  var username = location_st.substring(location_st.indexOf("username=") + 9);
+              }
+              else {
+                  return;
+              }
+
+              var req = new XMLHttpRequest();
+              req.open("GET", bpmWorklist, false);
+              req.setRequestHeader("BguPerimeterAtnToken", "username=" + username);
+              req.setRequestHeader("RequestTimestamp", date);
+
+              req.responseType = "Document";
+
+              req.send();
+              navigateMe(fullUrl, bpmWorklist);
+          }
+
+          function navigateMe(fullUrl, bpmWorklist) {
+              window.location.href = fullUrl + bpmWorklist;
+          }
+        </script>
+    </head>
+    <body onload="init()"></body>
+</html>

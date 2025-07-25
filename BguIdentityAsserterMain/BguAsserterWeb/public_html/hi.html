@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <script language="Javascript">
+          document.firstline = "redirect page"
+        </script>
+        <title>BGU Asserter Load</title>
+    </head>
+    <body>
+        <h1>BGU Asserter Tester</h1>
+        <p id="params"></p>
+        <script language="Javascript">
+          function init() {
+              var location_st = window.location.href.toString();
+              var fullUrl = location.protocol+'//'+location.hostname+(location.port ? ':'+location.port: '');
+
+              if (location_st.indexOf("username=") >  - 1) {
+                  var username = location_st.substring(location_st.indexOf("username=") + 9);
+              }
+              else {
+                  return '<h2>No parameter recieved</h2>';
+              }
+
+              return "<h2>BguPerimeterAtnToken</h2><p><span>Recieved username: " + username + "</span><br /><span>Server URL: " + fullUrl + "</span></p>";
+          }
+          document.getElementById("params").innerHTML = init();
+        </script>
+    </body>
+</html>

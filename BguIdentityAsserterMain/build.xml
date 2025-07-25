@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="windows-1252" ?>
+<project name="BguIdentityAsserter" default="jar" basedir=".">
+    <!-- Properties -->
+    <property name="src.dir" value="BguIdentityAsserter/src"/>
+    <property name="build.dir" value="BguIdentityAsserter/build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir" value="${build.dir}/jar"/>
+    <property name="jar.name" value="BguIdentityAsserter.jar"/>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+
+    <!-- Compile -->
+    <target name="compile" depends="clean">
+        <mkdir dir="${classes.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" includeantruntime="false" debug="true">
+            <classpath>
+                <pathelement path="../lib/weblogic.jar"/>
+                <pathelement path="../lib/wls-api.jar"/>
+                <pathelement path="../lib/ojdbc8.jar"/>
+                <pathelement path="../lib/javax.servlet.javax.servlet-api.jar"/>
+            </classpath>
+        </javac>
+        <!-- Copy XML descriptor files -->
+        <copy todir="${classes.dir}">
+            <fileset dir="${src.dir}" includes="**/*.xml"/>
+            <fileset dir="${src.dir}" includes="**/*.dtd"/>
+        </copy>
+    </target>
+
+    <!-- Jar -->
+    <target name="jar" depends="compile">
+        <mkdir dir="${jar.dir}"/>
+        <jar destfile="${jar.dir}/${jar.name}" basedir="${classes.dir}">
+            <manifest>
+                <attribute name="Built-By" value="${user.name}"/>
+            </manifest>
+        </jar>
+    </target>
+</project>

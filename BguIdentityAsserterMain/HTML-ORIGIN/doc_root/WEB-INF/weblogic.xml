@@ -1,0 +1,16 @@
+<!DOCTYPE weblogic-web-app PUBLIC "-//BEA Systems, Inc.//DTD Web Application 8.1//EN" "http://www.bea.com/servers/wls810/dtd/weblogic-web-jar.dtd">
+
+<weblogic-web-app>
+
+  <container-descriptor>
+    <index-directory-enabled>true</index-directory-enabled>
+  </container-descriptor>
+
+  <virtual-directory-mapping>
+    <local-path>/OraBPM/BPM_Middleware/user_projects/domains/bpm_domain/deploy</local-path>
+    <url-pattern>*</url-pattern>
+  </virtual-directory-mapping>
+
+  <context-root>/html</context-root>
+
+</weblogic-web-app>

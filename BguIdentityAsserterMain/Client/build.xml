@@ -1,0 +1,52 @@
+<project name="Build" default="all" basedir=".">
+ 
+<property name="fileDir" value="test" />
+<property name="base.dir" location="..\il\ac\bgu\it" />
+<!-- <property name="bea.home" location="/opt/weblogic/Oracle/Middleware/Oracle_Home" /> -->
+<property name="bea.home" location="C:\Oracle\Oracle12\Middleware\Oracle_Home" />
+<!--<property name="mbean.maker" location="${bea.home}/wlserver/modules/com.bea.core.mbean.maker_2.1.0.0.jar" />-->
+<property name="mbean.maker" location="${bea.home}\wlserver\modules\com.bea.core.mbean.maker.jar" />
+<property name="wls.home" value="${bea.home}\wlserver" />
+<property name="wls.lib.dir" value="${wls.home}\server\lib" />
+<property name="mbeantypes.dir" value="${wls.lib.dir}\mbeantypes" />
+<!--<property name="jar.file.name" value="your-name-for-the-provider-package.jar" />
+<property name="src.dir" value="${base.dir}/src" />
+<property name="provider.src.dir" value="${src.dir}/es" />-->
+<property name="build.dir" value="${base.dir}/build" />
+ 
+<target name="all" depends="build"/>
+ 
+ <target name="build" depends="clean,build.mdf,build.mjf"/>
+ 
+  <target name="clean">
+    <delete dir="${fileDir}" failonerror="false"/>
+    <delete file="BguIdentityAsserter.jar" failonerror="false"/>
+    <echo message="Clean finish" />
+  </target>
+ 
+  <!-- helper to build an MDF (mbean definition file) -->
+    <target name="build.mdf">
+        <java dir="${basedir}" fork="false" classname="weblogic.management.commo.WebLogicMBeanMaker">
+            <arg line="-files ${fileDir}" />
+            <arg value="-createStubs" />
+            <arg line="-MDF BguIdentityAsserter.xml" />
+        </java>
+        <echo message="Created Supporting Classes" />
+    </target>
+ 
+    <target name="build.mjf">
+ 
+        <copy todir="${fileDir}" flatten="true">
+            <fileset dir=".">
+              <include name="*.java" />
+            </fileset>
+        </copy>
+ 
+        <java dir="${basedir}" fork="false" classname="weblogic.management.commo.WebLogicMBeanMaker">
+            <arg line="-MJF BguIdentityAsserter.jar" />
+            <arg line="-files ${fileDir}" />
+        </java>
+        <echo message="Created Mbean Jar" />
+    </target>
+ 
+</project>

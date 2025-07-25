@@ -7,11 +7,6 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.servlet.http.HttpServletRequest;
 
-// Import the specific MBean interface
-import com.oracle.il.css.CustomRealmIdentityAsserterMBean;
-// Import the older UserCallback
-import weblogic.security.auth.callback.UserCallback;
-
 import weblogic.logging.NonCatalogLogger;
 import weblogic.management.security.ProviderMBean;
 import weblogic.security.principal.WLSUserImpl;

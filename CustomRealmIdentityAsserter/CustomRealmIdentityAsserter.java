@@ -29,6 +29,10 @@ public class CustomRealmIdentityAsserter implements AuthenticationProviderV2, Id
         initialize(services);
     }
 
+    public String getName() {
+        return "CustomRealmIdentityAsserter";
+    }
+
     public String getDescription() {
         return description;
     }

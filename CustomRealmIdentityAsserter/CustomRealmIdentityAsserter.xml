@@ -47,7 +47,7 @@
   Type          = "java.lang.String"
   Writeable     = "false"
   Preprocessor = "weblogic.management.configuration.LegalHelper.checkClassName(value)"
-  Default       = "&quot;com.oracle.il.css.CustomRealmIdentityAsserter&quot;"
+  Default       = "&quot;com.oracle.il.css.CustomRealmIdentityAsserterImpl&quot;"
  />
 
  <!-- You must set the value of the Description attribute

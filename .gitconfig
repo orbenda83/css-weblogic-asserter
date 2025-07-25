@@ -1,0 +1,14 @@
+[credential]
+	helper = osxkeychain
+	email = orbenda83@gmail.com
+	user = orbenda83
+[filter "lfs"]
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+[user]
+	email = orbenda83@gmail.com
+	name = orbenda83
+[pull]
+	rebase = false

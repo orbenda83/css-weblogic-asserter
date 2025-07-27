@@ -54,18 +54,11 @@
 
     <MBeanAttribute
         Name="ControlFlag"
-        Type="java.lang.String"
+        Type="boolean"
+        Writeable="true"
         Description="The control flag for the associated Login Module."
-        Default="SUFFICIENT"
-        Configurable="true"
-        Dynamic="true">
-        <LegalValues>
-            <String>REQUIRED</String>
-            <String>REQUISITE</String>
-            <String>SUFFICIENT</String>
-            <String>OPTIONAL</String>
-        </LegalValues>
-    </MBeanAttribute>
+        Default="true"
+    />
 
     <!-- The name of the HTTP header to check for the username -->
     <MBeanAttribute

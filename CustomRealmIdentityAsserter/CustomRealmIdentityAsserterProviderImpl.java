@@ -27,7 +27,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     private String description;
     private PrincipalValidator principalValidator;
     private NonCatalogLogger logger = new NonCatalogLogger("CustomRealmIdentityAsserterProviderImpl");
-    private String loginControlFlag; // NEW FIELD for MBean property
+    private boolean loginControlFlag; // NEW FIELD for MBean property
 
     public CustomRealmIdentityAsserterProviderImpl() {
         printMessage("constructor initialized"); // Corrected typo here

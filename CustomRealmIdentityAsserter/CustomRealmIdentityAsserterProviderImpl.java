@@ -73,15 +73,13 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         paramHashMap.put("IdentityAssertion", "true"); // This should be "true" for assertion modules
 
         // Use the configured loginModuleSufficient flag
-        LoginModuleControlFlag controlFlag = this.loginControlFlag ?
-            LoginModuleControlFlag.SUFFICIENT :
-            LoginModuleControlFlag.REQUIRED;
+        LoginModuleControlFlag controlFlag = this.loginControlFlag ? LoginModuleControlFlag.SUFFICIENT
+                : LoginModuleControlFlag.REQUIRED;
 
         return new AppConfigurationEntry(
-            "com.oracle.il.css.CustomRealmLoginModuleImpl",
-            controlFlag,
-            paramHashMap
-        );
+                "com.oracle.il.css.CustomRealmLoginModuleImpl",
+                controlFlag,
+                paramHashMap);
     }
 
     @Override
@@ -97,25 +95,30 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     }
 
     @Override
-    public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler) throws IdentityAssertionException {
+    public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler)
+            throws IdentityAssertionException {
         if (debugEnabled) {
-            printMessage("assertIdentity method invoked. Type: " + type + ", Token Class: " + (token != null ? token.getClass().getName() : "null"));
+            printMessage("assertIdentity method invoked. Type: " + type + ", Token Class: "
+                    + (token != null ? token.getClass().getName() : "null"));
         }
 
-        // IMPORTANT: The 'type' parameter here will be whatever you configured in the WebLogic Console
+        // IMPORTANT: The 'type' parameter here will be whatever you configured in the
+        // WebLogic Console
         // under your asserter's "Active Types" (e.g., "OAS_USER").
         // If the 'type' doesn't match what you expect, you might filter it out here.
         // For a simple header, you might or might not need an explicit type check here,
         // but it's good practice if your asserter handles multiple types.
         // Example check (uncomment if you add "OAS_USER_HEADER" as Active Type):
         /*
-        if (!"OAS_USER".equals(type)) { // Match this to your exact "Active Type" in console
-            if (debugEnabled) {
-                printMessage("Unsupported token type: '" + type + "'. This asserter expects 'OAS_USER'. Returning null.");
-            }
-            return null;
-        }
-        */
+         * if (!"OAS_USER".equals(type)) { // Match this to your exact "Active Type" in
+         * console
+         * if (debugEnabled) {
+         * printMessage("Unsupported token type: '" + type +
+         * "'. This asserter expects 'OAS_USER'. Returning null.");
+         * }
+         * return null;
+         * }
+         */
 
         // Checking we got the right kind of token
         if (debugEnabled) {
@@ -124,13 +127,15 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
 
         if (!this.headerName.equals(type)) {
             if (debugEnabled) {
-                printMessage("Unsupported token type: '" + type + "'. This asserter expects '" + this.headerName + "'. Returning null.");
+                printMessage("Unsupported token type: '" + type + "'. This asserter expects '" + this.headerName
+                        + "'. Returning null.");
             }
             return null;
         } else {
             final String username = new String((byte[]) token);
             if (debugEnabled) {
-                printMessage("Got token type: '" + type + "' which confirms to what this asserter expects with the user name: " + username);
+                printMessage("Got token type: '" + type
+                        + "' which confirms to what this asserter expects with the user name: " + username);
             }
         }
 
@@ -138,18 +143,21 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             printMessage("After checking the header name");
         }
 
-        if (!(token instanceof HttpServletRequest)) {
-            if (debugEnabled) {
-                printMessage("Token is not an HttpServletRequest. Returning null.");
+        if (!(username == null || username.isEmpty())) {
+            if (!(token instanceof HttpServletRequest)) {
+                if (debugEnabled) {
+                    printMessage("Token is not an HttpServletRequest. Returning null.");
+                }
+                return null; // Token must be an HttpServletRequest for this asserter
             }
-            return null; // Token must be an HttpServletRequest for this asserter
-        }
 
-        HttpServletRequest request = (HttpServletRequest) token;
-        final String username = request.getHeader(this.headerName);
+            HttpServletRequest request = (HttpServletRequest) token;
+            final String username = request.getHeader(this.headerName);
 
-        if (debugEnabled) {
-            printMessage("Checking for header '" + this.headerName + "'. Value found: '" + (username != null ? username : "null (or empty string)"));
+            if (debugEnabled) {
+                printMessage("Checking for header '" + this.headerName + "'. Value found: '"
+                        + (username != null ? username : "null (or empty string)"));
+            }
         }
 
         if (username == null || username.isEmpty()) {
@@ -166,12 +174,14 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
 
         if (validateUserInRealm(userPrincipal)) {
             if (debugEnabled) {
-                printMessage("User '" + username + "' validated successfully by PrincipalValidator. Returning CustomRealmCallbackHandlerImpl.");
+                printMessage("User '" + username
+                        + "' validated successfully by PrincipalValidator. Returning CustomRealmCallbackHandlerImpl.");
             }
             return new CustomRealmCallbackHandlerImpl(username);
         } else {
             if (debugEnabled) {
-                printMessage("User '" + username + "' validation failed by PrincipalValidator. Throwing IdentityAssertionException.");
+                printMessage("User '" + username
+                        + "' validation failed by PrincipalValidator. Throwing IdentityAssertionException.");
             }
             throw new IdentityAssertionException("User '" + username + "' not found in security realm.");
         }
@@ -189,7 +199,8 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             return isValid;
         } catch (Exception e) {
             if (debugEnabled) {
-                printMessage("Exception during PrincipalValidator.validate() for " + principal.getName() + ": " + e.getMessage());
+                printMessage("Exception during PrincipalValidator.validate() for " + principal.getName() + ": "
+                        + e.getMessage());
             }
             return false;
         }
@@ -197,25 +208,24 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
 
     @Deprecated
     public AppConfigurationEntry getLoginModuleConfiguration() {
-        // This method is part of AuthenticationProviderV2, but for an Identity Asserter,
+        // This method is part of AuthenticationProviderV2, but for an Identity
+        // Asserter,
         // getAssertionModuleConfiguration() is typically used for the assertion flow.
         // This method might be called for traditional authentication flows.
         if (debugEnabled) {
-             printMessage("getLoginModuleConfiguration called (non-assertion context).");
+            printMessage("getLoginModuleConfiguration called (non-assertion context).");
         }
         HashMap<String, Object> paramHashMap = new HashMap<String, Object>();
         paramHashMap.put("IdentityAssertion", "false"); // Indicate it's not for assertion flow here
 
         // Use the configured loginModuleSufficient flag
-        LoginModuleControlFlag controlFlag = this.loginControlFlag ?
-            LoginModuleControlFlag.SUFFICIENT :
-            LoginModuleControlFlag.REQUIRED;
+        LoginModuleControlFlag controlFlag = this.loginControlFlag ? LoginModuleControlFlag.SUFFICIENT
+                : LoginModuleControlFlag.REQUIRED;
 
         return new AppConfigurationEntry(
-            "com.oracle.il.css.CustomRealmLoginModuleImpl",
-            controlFlag,
-            paramHashMap
-        );
+                "com.oracle.il.css.CustomRealmLoginModuleImpl",
+                controlFlag,
+                paramHashMap);
     }
 
     // Corrected method name from printMesaage to printMessage

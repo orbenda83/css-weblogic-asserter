@@ -97,6 +97,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     @Override
     public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler)
             throws IdentityAssertionException {
+        String username;
         if (debugEnabled) {
             printMessage("assertIdentity method invoked. Type: " + type + ", Token Class: "
                     + (token != null ? token.getClass().getName() : "null"));
@@ -132,7 +133,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             }
             return null;
         } else {
-            final String username = new String((byte[]) token);
+            username = new String((byte[]) token);
             if (debugEnabled) {
                 printMessage("Got token type: '" + type
                         + "' which confirms to what this asserter expects with the user name: " + username);
@@ -152,7 +153,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             }
 
             HttpServletRequest request = (HttpServletRequest) token;
-            final String username = request.getHeader(this.headerName);
+            username = request.getHeader(this.headerName);
 
             if (debugEnabled) {
                 printMessage("Checking for header '" + this.headerName + "'. Value found: '"

@@ -145,32 +145,36 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         }
     }
 
-    // @Deprecated // This method seems to be for AuthenticationProvider, not typically part of IdentityAsserterV2 flow for assertion
-    // public AppConfigurationEntry getLoginModuleConfiguration() {
-    //     // This method signature is usually for AuthenticationProviderV2's own LoginModule setup,
-    //     // not directly for the assertion process of IdentityAsserterV2.
-    //     // The original code uses System.out.println, let's keep it but add a debug flag check.
-    //     if (debugEnabled) {
-    //          logger.debug("CustomRealmIdentityAsserterProviderImpl: getLoginModuleConfiguration called (non-assertion context).");
-    //     }
-    //     // System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration of non Assertion!!! "); // Removed direct System.out.println
-
-    //     HashMap<String, Object> hashMap = new HashMap<String, Object>();
-    //     hashMap.put("IdentityAssertion", "false"); // Setting a property for the LoginModule
-    //     return getConfiguration(hashMap);
-    // }
-
-    // Renamed for clarity, was 'getConfiguration' in original, but handles LoginModule config
-    private AppConfigurationEntry getLoginModuleAppConfiguration(HashMap<String, ?> paramHashMap) {
+    @Deprecated // This method seems to be for AuthenticationProvider, not typically part of IdentityAsserterV2 flow for assertion
+    public AppConfigurationEntry getLoginModuleConfiguration() {
+        // This method signature is usually for AuthenticationProviderV2's own LoginModule setup,
+        // not directly for the assertion process of IdentityAsserterV2.
+        // The original code uses System.out.println, let's keep it but add a debug flag check.
         if (debugEnabled) {
-            logger.debug("CustomRealmIdentityAsserterProviderImpl: Creating AppConfigurationEntry for LoginModule. Parameters: " + paramHashMap);
+             logger.debug("CustomRealmIdentityAsserterProviderImpl: getLoginModuleConfiguration called (non-assertion context).");
         }
-        // System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration"); // Removed direct System.out.println
+        // System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration of non Assertion!!! "); // Removed direct System.out.println
 
+        HashMap<String, Object> hashMap = new HashMap<String, Object>();
+        hashMap.put("IdentityAssertion", "false"); // Setting a property for the LoginModule
         return new AppConfigurationEntry(
             "com.oracle.il.css.CustomRealmLoginModuleImpl",
             AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT,
             paramHashMap
         );
     }
+
+    // // Renamed for clarity, was 'getConfiguration' in original, but handles LoginModule config
+    // private AppConfigurationEntry getLoginModuleAppConfiguration(HashMap<String, ?> paramHashMap) {
+    //     if (debugEnabled) {
+    //         logger.debug("CustomRealmIdentityAsserterProviderImpl: Creating AppConfigurationEntry for LoginModule. Parameters: " + paramHashMap);
+    //     }
+    //     // System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration"); // Removed direct System.out.println
+
+    //     return new AppConfigurationEntry(
+    //         "com.oracle.il.css.CustomRealmLoginModuleImpl",
+    //         AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT,
+    //         paramHashMap
+    //     );
+    // }
 }

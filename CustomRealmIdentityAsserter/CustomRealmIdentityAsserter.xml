@@ -44,6 +44,14 @@
      Default     = "new String[] { &quot;GET&quot;, &quot;POST&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot; }"
      />
 
+     <MBeanAttribute
+     Name         = "Base64DecodingRequired"
+     Type         = "boolean"
+     Writeable    = "false"
+     Default      = "false"
+     Description  = "See MyIdentityAsserter-doc.xml."
+     />
+
     <!-- The name of the HTTP header to check for the username -->
     <MBeanAttribute
         Name="HeaderName"

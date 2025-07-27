@@ -117,6 +117,14 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         }
         */
 
+        // Checking we got the right kind of token
+        if (!this.headerName.equals(type)) {
+            if (debugEnabled) {
+                printMessage("Unsupported token type: '" + type + "'. This asserter expects '" + this.headerName + "'. Returning null.");
+            }
+            return null;
+        }
+
         if (!(token instanceof HttpServletRequest)) {
             if (debugEnabled) {
                 printMessage("Token is not an HttpServletRequest. Returning null.");

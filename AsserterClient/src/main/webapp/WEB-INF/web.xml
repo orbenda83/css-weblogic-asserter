@@ -23,7 +23,7 @@
     </security-constraint>
 
     <login-config>
-        <auth-method>FORM</auth-method>
+        <auth-method>CLIENT-CERT</auth-method>
         <form-login-config>
             <form-login-page>/login.jsp</form-login-page>
             <form-error-page>/error.jsp</form-error-page>

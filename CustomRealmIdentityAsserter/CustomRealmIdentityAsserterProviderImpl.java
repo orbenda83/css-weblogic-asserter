@@ -48,7 +48,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             printMessage("Configured Header Name: " + this.headerName);
             printMessage("Debug Enabled: " + this.debugEnabled);
             printMessage("Description: " + this.description);
-            printMessage("Login Module Sufficient Flag: " + this.loginModuleSufficient); // NEW LOG
+            printMessage("Login Module Sufficient Flag: " + this.loginControlFlag); // NEW LOG
         }
     }
 

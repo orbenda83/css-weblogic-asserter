@@ -45,7 +45,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         this.principalValidator = new PrincipalValidatorImpl();
 
         if (this.debugEnabled) {
-            printMesaage("initialized.");
+            printMesaage("initialized");
             printMesaage("Configured Header Name: " + this.headerName);
             printMesaage("Debug Enabled: " + this.debugEnabled);
             printMesaage("Description: " + this.description);
@@ -65,7 +65,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     @Override
     public AppConfigurationEntry getAssertionModuleConfiguration() {
         if (debugEnabled) {
-            printMesaage("getAssertionModuleConfiguration called. Returning null as per implementation.");
+            printMesaage("getAssertionModuleConfiguration called");
         }
         // return null; // This method is often not used for simple header assertion
         HashMap<String, Object> paramHashMap = new HashMap<String, Object>();

@@ -1,4 +1,4 @@
-<?xml version="1.0" ?>
+<?xml version="1.0"?>
 <!DOCTYPE MBeanType SYSTEM "commo.dtd">
 <MBeanType
     Name="CustomRealmIdentityAsserter"
@@ -31,26 +31,41 @@
         Default="&quot;1.0.0&quot;"
     />
 
-    <MBeanAttribute  
-     Name         = "SupportedTypes"
-     Type         = "java.lang.String[]"
-     Writeable     = "false"
-     Default     = "new String[] { &quot;HttpServletRequest&quot;, &quot;OAS_USER&quot;, &quot;GET&quot;, &quot;Content-Type&quot;, &quot;Accept&quot;, &quot;POST&quot;, &quot;Host&quot;, &quot;Location&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot;  }"
-     />
-     
-     <MBeanAttribute  
-     Name         = "ActiveTypes"
-     Type         = "java.lang.String[]"
-     Default     = "new String[] { &quot;HttpServletRequest&quot;, &quot;OAS_USER&quot;, &quot;GET&quot;, &quot;POST&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot; }"
-     />
+    <MBeanAttribute
+        Name="SupportedTypes"
+        Type="java.lang.String[]"
+        Writeable="false"
+        Default="new String[] { &quot;HttpServletRequest&quot;, &quot;OAS_USER&quot;, &quot;GET&quot;, &quot;Content-Type&quot;, &quot;Accept&quot;, &quot;POST&quot;, &quot;Host&quot;, &quot;Location&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot;  }"
+    />
 
-     <MBeanAttribute
-     Name         = "Base64DecodingRequired"
-     Type         = "boolean"
-     Writeable    = "false"
-     Default      = "false"
-     Description  = "See MyIdentityAsserter-doc.xml."
-     />
+    <MBeanAttribute
+        Name="ActiveTypes"
+        Type="java.lang.String[]"
+        Default="new String[] { &quot;HttpServletRequest&quot;, &quot;OAS_USER&quot;, &quot;GET&quot;, &quot;POST&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot; }"
+    />
+
+    <MBeanAttribute
+        Name="Base64DecodingRequired"
+        Type="boolean"
+        Writeable="false"
+        Default="false"
+        Description="See MyIdentityAsserter-doc.xml."
+    />
+
+    <MBeanAttribute
+        Name="ControlFlag"
+        Type="java.lang.String"
+        Description="The control flag for the associated Login Module."
+        Default="SUFFICIENT"
+        Configurable="true"
+        Dynamic="true">
+        <LegalValues>
+            <String>REQUIRED</String>
+            <String>REQUISITE</String>
+            <String>SUFFICIENT</String>
+            <String>OPTIONAL</String>
+        </LegalValues>
+    </MBeanAttribute>
 
     <!-- The name of the HTTP header to check for the username -->
     <MBeanAttribute
@@ -59,7 +74,7 @@
         Default="&quot;OAS_USER&quot;"
         Description="The name of the HTTP header that contains the user ID."
     />
-    
+
     <!-- Flag to enable/disable debugging -->
     <MBeanAttribute
         Name="DebugEnabled"

@@ -27,7 +27,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     private String description;
     private PrincipalValidator principalValidator;
     private NonCatalogLogger logger = new NonCatalogLogger("CustomRealmIdentityAsserterProviderImpl");
-    private boolean loginModuleSufficient; // NEW FIELD for MBean property
+    private String loginControlFlag; // NEW FIELD for MBean property
 
     public CustomRealmIdentityAsserterProviderImpl() {
         printMessage("constructor initialized"); // Corrected typo here
@@ -41,7 +41,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         this.debugEnabled = myMBean.getDebugEnabled();
         this.description = myMBean.getDescription() + "\n" + myMBean.getVersion();
         this.principalValidator = new PrincipalValidatorImpl();
-        this.loginModuleSufficient = myMBean.getLoginModuleSufficient(); // NEW: Read the MBean property
+        this.loginControlFlag = myMBean.getControlFlag(); // NEW: Read the MBean property
 
         if (this.debugEnabled) {
             printMessage("initialized");
@@ -73,7 +73,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         paramHashMap.put("IdentityAssertion", "true"); // This should be "true" for assertion modules
 
         // Use the configured loginModuleSufficient flag
-        LoginModuleControlFlag controlFlag = this.loginModuleSufficient ?
+        LoginModuleControlFlag controlFlag = this.loginControlFlag ?
             LoginModuleControlFlag.SUFFICIENT :
             LoginModuleControlFlag.REQUIRED;
 
@@ -186,7 +186,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         paramHashMap.put("IdentityAssertion", "false"); // Indicate it's not for assertion flow here
 
         // Use the configured loginModuleSufficient flag
-        LoginModuleControlFlag controlFlag = this.loginModuleSufficient ?
+        LoginModuleControlFlag controlFlag = this.loginControlFlag ?
             LoginModuleControlFlag.SUFFICIENT :
             LoginModuleControlFlag.REQUIRED;
 

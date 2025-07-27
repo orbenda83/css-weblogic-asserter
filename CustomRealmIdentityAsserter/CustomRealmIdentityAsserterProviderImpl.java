@@ -155,8 +155,8 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         }
         // System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration of non Assertion!!! "); // Removed direct System.out.println
 
-        HashMap<String, Object> hashMap = new HashMap<String, Object>();
-        hashMap.put("IdentityAssertion", "false"); // Setting a property for the LoginModule
+        HashMap<String, Object> paramHashMap = new HashMap<String, Object>();
+        paramHashMap.put("IdentityAssertion", "false"); // Setting a property for the LoginModule
         return new AppConfigurationEntry(
             "com.oracle.il.css.CustomRealmLoginModuleImpl",
             AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT,

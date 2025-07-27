@@ -45,10 +45,10 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         this.principalValidator = new PrincipalValidatorImpl();
 
         if (this.debugEnabled) {
-            logger.debug("CustomRealmIdentityAsserterProviderImpl initialized.");
-            logger.debug("Configured Header Name: " + this.headerName);
-            logger.debug("Debug Enabled: " + this.debugEnabled);
-            logger.debug("Description: " + this.description);
+            System.out.println("CustomRealmIdentityAsserterProviderImpl initialized.");
+            System.out.println("Configured Header Name: " + this.headerName);
+            System.out.println("Debug Enabled: " + this.debugEnabled);
+            System.out.println("Description: " + this.description);
         }
     }
 
@@ -65,7 +65,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     @Override
     public AppConfigurationEntry getAssertionModuleConfiguration() {
         if (debugEnabled) {
-            logger.debug("getAssertionModuleConfiguration called. Returning null as per implementation.");
+            System.out.println("getAssertionModuleConfiguration called. Returning null as per implementation.");
         }
         return null; // This method is often not used for simple header assertion
     }
@@ -78,19 +78,19 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     @Override
     public void shutdown() {
         if (debugEnabled) {
-            logger.debug("CustomRealmIdentityAsserterProviderImpl shutdown.");
+            System.out.println("CustomRealmIdentityAsserterProviderImpl shutdown.");
         }
     }
 
     @Override
     public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler) throws IdentityAssertionException {
         if (debugEnabled) {
-            logger.debug("assertIdentity method invoked. Type: " + type + ", Token Class: " + (token != null ? token.getClass().getName() : "null"));
+            System.out.println("assertIdentity method invoked. Type: " + type + ", Token Class: " + (token != null ? token.getClass().getName() : "null"));
         }
 
         if (!(token instanceof HttpServletRequest)) {
             if (debugEnabled) {
-                logger.debug("Token is not an HttpServletRequest. Returning null.");
+                System.out.println("Token is not an HttpServletRequest. Returning null.");
             }
             return null; // Token must be an HttpServletRequest for this asserter
         }
@@ -99,29 +99,29 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         final String username = request.getHeader(this.headerName);
 
         if (debugEnabled) {
-            logger.debug("Checking for header '" + this.headerName + "'. Value found: '" + (username != null ? username : "null (or empty string)"));
+            System.out.println("Checking for header '" + this.headerName + "'. Value found: '" + (username != null ? username : "null (or empty string)"));
         }
 
         if (username == null || username.isEmpty()) {
             if (debugEnabled) {
-                logger.debug("Header '" + this.headerName + "' is null or empty. Returning null.");
+                System.out.println("Header '" + this.headerName + "' is null or empty. Returning null.");
             }
             return null; // No user identified from header
         }
 
         final Principal userPrincipal = new WLSUserImpl(username);
         if (debugEnabled) {
-            logger.debug("Attempting to validate principal: " + userPrincipal.getName());
+            System.out.println("Attempting to validate principal: " + userPrincipal.getName());
         }
 
         if (validateUserInRealm(userPrincipal)) {
             if (debugEnabled) {
-                logger.debug("User '" + username + "' validated successfully by PrincipalValidator. Returning CustomRealmCallbackHandlerImpl.");
+                System.out.println("User '" + username + "' validated successfully by PrincipalValidator. Returning CustomRealmCallbackHandlerImpl.");
             }
             return new CustomRealmCallbackHandlerImpl(username);
         } else {
             if (debugEnabled) {
-                logger.debug("User '" + username + "' validation failed by PrincipalValidator. Throwing IdentityAssertionException.");
+                System.out.println("User '" + username + "' validation failed by PrincipalValidator. Throwing IdentityAssertionException.");
             }
             throw new IdentityAssertionException("User '" + username + "' not found in security realm.");
         }
@@ -129,17 +129,17 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
 
     private boolean validateUserInRealm(Principal principal) {
         if (debugEnabled) {
-            logger.debug("Invoking PrincipalValidator.validate() for principal: " + principal.getName());
+            System.out.println("Invoking PrincipalValidator.validate() for principal: " + principal.getName());
         }
         try {
             boolean isValid = this.principalValidator.validate(principal);
             if (debugEnabled) {
-                logger.debug("PrincipalValidator.validate() returned: " + isValid + " for " + principal.getName());
+                System.out.println("PrincipalValidator.validate() returned: " + isValid + " for " + principal.getName());
             }
             return isValid;
         } catch (Exception e) {
             if (debugEnabled) {
-                logger.debug("Exception during PrincipalValidator.validate() for " + principal.getName() + ": " + e.getMessage(), e);
+                System.out.println("Exception during PrincipalValidator.validate() for " + principal.getName() + ": " + e.getMessage(), e);
             }
             return false;
         }
@@ -151,7 +151,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         // not directly for the assertion process of IdentityAsserterV2.
         // The original code uses System.out.println, let's keep it but add a debug flag check.
         if (debugEnabled) {
-             logger.debug("CustomRealmIdentityAsserterProviderImpl: getLoginModuleConfiguration called (non-assertion context).");
+             System.out.println("CustomRealmIdentityAsserterProviderImpl: getLoginModuleConfiguration called (non-assertion context).");
         }
         // System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration of non Assertion!!! "); // Removed direct System.out.println
 
@@ -167,7 +167,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     // // Renamed for clarity, was 'getConfiguration' in original, but handles LoginModule config
     // private AppConfigurationEntry getLoginModuleAppConfiguration(HashMap<String, ?> paramHashMap) {
     //     if (debugEnabled) {
-    //         logger.debug("CustomRealmIdentityAsserterProviderImpl: Creating AppConfigurationEntry for LoginModule. Parameters: " + paramHashMap);
+    //         System.out.println("CustomRealmIdentityAsserterProviderImpl: Creating AppConfigurationEntry for LoginModule. Parameters: " + paramHashMap);
     //     }
     //     // System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration"); // Removed direct System.out.println
 

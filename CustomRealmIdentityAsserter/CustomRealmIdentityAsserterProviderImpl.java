@@ -142,10 +142,10 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
 
         if (debugEnabled) {
             printMessage("After checking the header name");
-            printMessage("Found user name" + username);
+            printMessage("Found user name " + username);
         }
 
-        if (!(username == null || username.isEmpty())) {
+        if ((username == null || username.isEmpty())) {
             if (!(token instanceof HttpServletRequest)) {
                 if (debugEnabled) {
                     printMessage("Token is not an HttpServletRequest. Returning null.");

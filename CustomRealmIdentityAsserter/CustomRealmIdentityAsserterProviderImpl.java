@@ -139,7 +139,7 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             return isValid;
         } catch (Exception e) {
             if (debugEnabled) {
-                System.out.println("Exception during PrincipalValidator.validate() for " + principal.getName() + ": " + e.getMessage(), e);
+                System.out.println("Exception during PrincipalValidator.validate() for " + principal.getName() + ": " + e.getMessage());
             }
             return false;
         }

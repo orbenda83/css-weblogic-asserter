@@ -169,44 +169,28 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             return null; // No user identified from header
         }
 
-        final Principal userPrincipal = new WLSUserImpl(username);
-        if (debugEnabled) {
-            printMessage("Attempting to validate principal: " + userPrincipal.getName());
-        }
-
-        if (validateUserInRealm(userPrincipal)) {
-            if (debugEnabled) {
-                printMessage("User '" + username
-                        + "' validated successfully by PrincipalValidator. Returning CustomRealmCallbackHandlerImpl.");
-            }
-            return new CustomRealmCallbackHandlerImpl(username);
-        } else {
-            if (debugEnabled) {
-                printMessage("User '" + username
-                        + "' validation failed by PrincipalValidator. Throwing IdentityAssertionException.");
-            }
-            throw new IdentityAssertionException("User '" + username + "' not found in security realm.");
-        }
+        return new CustomRealmCallbackHandlerImpl(username);
     }
 
-    private boolean validateUserInRealm(Principal principal) {
-        if (debugEnabled) {
-            printMessage("Invoking PrincipalValidator.validate() for principal: " + principal.getName());
-        }
-        try {
-            boolean isValid = this.principalValidator.validate(principal);
-            if (debugEnabled) {
-                printMessage("PrincipalValidator.validate() returned: " + isValid + " for " + principal.getName());
-            }
-            return isValid;
-        } catch (Exception e) {
-            if (debugEnabled) {
-                printMessage("Exception during PrincipalValidator.validate() for " + principal.getName() + ": "
-                        + e.getMessage());
-            }
-            return false;
-        }
-    }
+    // private boolean validateUserInRealm(Principal principal) {
+    //     if (debugEnabled) {
+    //         printMessage("Invoking PrincipalValidator.validate() for principal: " + principal.getName());
+    //     }
+
+    //     try {
+    //         boolean isValid = this.principalValidator.validate(principal);
+    //         if (debugEnabled) {
+    //             printMessage("PrincipalValidator.validate() returned: " + isValid + " for " + principal.getName());
+    //         }
+    //         return isValid;
+    //     } catch (Exception e) {
+    //         if (debugEnabled) {
+    //             printMessage("Exception during PrincipalValidator.validate() for " + principal.getName() + ": "
+    //                     + e.getMessage());
+    //         }
+    //         return false;
+    //     }
+    // }
 
     @Deprecated
     public AppConfigurationEntry getLoginModuleConfiguration() {

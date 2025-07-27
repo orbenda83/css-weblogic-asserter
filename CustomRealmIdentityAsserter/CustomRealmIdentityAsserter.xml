@@ -31,6 +31,19 @@
         Default="&quot;1.0.0&quot;"
     />
 
+    <MBeanAttribute  
+     Name         = "SupportedTypes"
+     Type         = "java.lang.String[]"
+     Writeable     = "false"
+     Default     = "new String[] { &quot;GET&quot;, &quot;Content-Type&quot;, &quot;Accept&quot;, &quot;POST&quot;, &quot;Host&quot;, &quot;Location&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot;  }"
+     />
+     
+     <MBeanAttribute  
+     Name         = "ActiveTypes"
+     Type         = "java.lang.String[]"
+     Default     = "new String[] { &quot;GET&quot;, &quot;POST&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot; }"
+     />
+
     <!-- The name of the HTTP header to check for the username -->
     <MBeanAttribute
         Name="HeaderName"

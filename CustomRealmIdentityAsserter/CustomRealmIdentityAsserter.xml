@@ -35,13 +35,13 @@
      Name         = "SupportedTypes"
      Type         = "java.lang.String[]"
      Writeable     = "false"
-     Default     = "new String[] { &quot;GET&quot;, &quot;Content-Type&quot;, &quot;Accept&quot;, &quot;POST&quot;, &quot;Host&quot;, &quot;Location&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot;  }"
+     Default     = "new String[] { &quot;OAS_USER&quot;, &quot;GET&quot;, &quot;Content-Type&quot;, &quot;Accept&quot;, &quot;POST&quot;, &quot;Host&quot;, &quot;Location&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot;  }"
      />
      
      <MBeanAttribute  
      Name         = "ActiveTypes"
      Type         = "java.lang.String[]"
-     Default     = "new String[] { &quot;GET&quot;, &quot;POST&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot; }"
+     Default     = "new String[] { &quot;OAS_USER&quot;, &quot;GET&quot;, &quot;POST&quot;, &quot;Cookie&quot;, &quot;Set-Cookie&quot; }"
      />
 
      <MBeanAttribute
@@ -56,7 +56,7 @@
     <MBeanAttribute
         Name="HeaderName"
         Type="java.lang.String"
-        Default="&quot;X-User-Id&quot;"
+        Default="&quot;OAS_USER&quot;"
         Description="The name of the HTTP header that contains the user ID."
     />
     

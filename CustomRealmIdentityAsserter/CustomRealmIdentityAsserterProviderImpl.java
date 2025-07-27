@@ -163,18 +163,4 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
             paramHashMap
         );
     }
-
-    // // Renamed for clarity, was 'getConfiguration' in original, but handles LoginModule config
-    // private AppConfigurationEntry getLoginModuleAppConfiguration(HashMap<String, ?> paramHashMap) {
-    //     if (debugEnabled) {
-    //         System.out.println("CustomRealmIdentityAsserterProviderImpl: Creating AppConfigurationEntry for LoginModule. Parameters: " + paramHashMap);
-    //     }
-    //     // System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration"); // Removed direct System.out.println
-
-    //     return new AppConfigurationEntry(
-    //         "com.oracle.il.css.CustomRealmLoginModuleImpl",
-    //         AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT,
-    //         paramHashMap
-    //     );
-    // }
 }

@@ -7,10 +7,6 @@ import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.auth.login.AppConfigurationEntry;
 import javax.servlet.http.HttpServletRequest;
 
-// Assuming CustomRealmCallbackHandlerImpl and CustomRealmLoginModuleImpl exist in the same package
-// import com.oracle.il.css.CustomRealmCallbackHandlerImpl; // Already in same package, no explicit import needed if in same dir
-// import com.oracle.il.css.CustomRealmLoginModuleImpl; // Assuming this is also in the same package
-
 import weblogic.logging.NonCatalogLogger;
 import weblogic.management.security.ProviderMBean;
 import weblogic.security.principal.WLSUserImpl;
@@ -21,6 +17,7 @@ import weblogic.security.spi.IdentityAsserterV2;
 import weblogic.security.spi.IdentityAssertionException;
 import weblogic.security.spi.PrincipalValidator;
 import weblogic.security.spi.SecurityServices;
+import javax.security.auth.login.AppConfigurationEntry.LoginModuleControlFlag; // Import this
 
 import java.util.HashMap;
 
@@ -29,10 +26,11 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     private boolean debugEnabled;
     private String description;
     private PrincipalValidator principalValidator;
-    private NonCatalogLogger logger = new NonCatalogLogger("CustomRealmIdentityAsserterProviderImpl"); // Logger instance
+    private NonCatalogLogger logger = new NonCatalogLogger("CustomRealmIdentityAsserterProviderImpl");
+    private boolean loginModuleSufficient; // NEW FIELD for MBean property
 
     public CustomRealmIdentityAsserterProviderImpl() {
-        printMesaage("constructor initialized");
+        printMessage("constructor initialized"); // Corrected typo here
     }
 
     @Override
@@ -43,12 +41,14 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         this.debugEnabled = myMBean.getDebugEnabled();
         this.description = myMBean.getDescription() + "\n" + myMBean.getVersion();
         this.principalValidator = new PrincipalValidatorImpl();
+        this.loginModuleSufficient = myMBean.getLoginModuleSufficient(); // NEW: Read the MBean property
 
         if (this.debugEnabled) {
-            printMesaage("initialized");
-            printMesaage("Configured Header Name: " + this.headerName);
-            printMesaage("Debug Enabled: " + this.debugEnabled);
-            printMesaage("Description: " + this.description);
+            printMessage("initialized");
+            printMessage("Configured Header Name: " + this.headerName);
+            printMessage("Debug Enabled: " + this.debugEnabled);
+            printMessage("Description: " + this.description);
+            printMessage("Login Module Sufficient Flag: " + this.loginModuleSufficient); // NEW LOG
         }
     }
 
@@ -65,14 +65,21 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     @Override
     public AppConfigurationEntry getAssertionModuleConfiguration() {
         if (debugEnabled) {
-            printMesaage("getAssertionModuleConfiguration called");
+            printMessage("getAssertionModuleConfiguration called.");
         }
-        // return null; // This method is often not used for simple header assertion
+        // This method should return the AppConfigurationEntry for the LoginModule
+        // that performs the actual assertion.
         HashMap<String, Object> paramHashMap = new HashMap<String, Object>();
-        paramHashMap.put("IdentityAssertion", "false"); // Setting a property for the LoginModule
+        paramHashMap.put("IdentityAssertion", "true"); // This should be "true" for assertion modules
+
+        // Use the configured loginModuleSufficient flag
+        LoginModuleControlFlag controlFlag = this.loginModuleSufficient ?
+            LoginModuleControlFlag.SUFFICIENT :
+            LoginModuleControlFlag.REQUIRED;
+
         return new AppConfigurationEntry(
             "com.oracle.il.css.CustomRealmLoginModuleImpl",
-            AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT,
+            controlFlag,
             paramHashMap
         );
     }
@@ -85,19 +92,34 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
     @Override
     public void shutdown() {
         if (debugEnabled) {
-            printMesaage("shutdown");
+            printMessage("shutdown");
         }
     }
 
     @Override
     public CallbackHandler assertIdentity(String type, Object token, ContextHandler contextHandler) throws IdentityAssertionException {
         if (debugEnabled) {
-            printMesaage("assertIdentity method invoked. Type: " + type + ", Token Class: " + (token != null ? token.getClass().getName() : "null"));
+            printMessage("assertIdentity method invoked. Type: " + type + ", Token Class: " + (token != null ? token.getClass().getName() : "null"));
         }
+
+        // IMPORTANT: The 'type' parameter here will be whatever you configured in the WebLogic Console
+        // under your asserter's "Active Types" (e.g., "OAS_USER").
+        // If the 'type' doesn't match what you expect, you might filter it out here.
+        // For a simple header, you might or might not need an explicit type check here,
+        // but it's good practice if your asserter handles multiple types.
+        // Example check (uncomment if you add "OAS_USER_HEADER" as Active Type):
+        /*
+        if (!"OAS_USER".equals(type)) { // Match this to your exact "Active Type" in console
+            if (debugEnabled) {
+                printMessage("Unsupported token type: '" + type + "'. This asserter expects 'OAS_USER'. Returning null.");
+            }
+            return null;
+        }
+        */
 
         if (!(token instanceof HttpServletRequest)) {
             if (debugEnabled) {
-                printMesaage("Token is not an HttpServletRequest. Returning null.");
+                printMessage("Token is not an HttpServletRequest. Returning null.");
             }
             return null; // Token must be an HttpServletRequest for this asserter
         }
@@ -106,29 +128,29 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
         final String username = request.getHeader(this.headerName);
 
         if (debugEnabled) {
-            printMesaage("Checking for header '" + this.headerName + "'. Value found: '" + (username != null ? username : "null (or empty string)"));
+            printMessage("Checking for header '" + this.headerName + "'. Value found: '" + (username != null ? username : "null (or empty string)"));
         }
 
         if (username == null || username.isEmpty()) {
             if (debugEnabled) {
-                printMesaage("Header '" + this.headerName + "' is null or empty. Returning null.");
+                printMessage("Header '" + this.headerName + "' is null or empty. Returning null.");
             }
             return null; // No user identified from header
         }
 
         final Principal userPrincipal = new WLSUserImpl(username);
         if (debugEnabled) {
-            printMesaage("Attempting to validate principal: " + userPrincipal.getName());
+            printMessage("Attempting to validate principal: " + userPrincipal.getName());
         }
 
         if (validateUserInRealm(userPrincipal)) {
             if (debugEnabled) {
-                printMesaage("User '" + username + "' validated successfully by PrincipalValidator. Returning CustomRealmCallbackHandlerImpl.");
+                printMessage("User '" + username + "' validated successfully by PrincipalValidator. Returning CustomRealmCallbackHandlerImpl.");
             }
             return new CustomRealmCallbackHandlerImpl(username);
         } else {
             if (debugEnabled) {
-                printMesaage("User '" + username + "' validation failed by PrincipalValidator. Throwing IdentityAssertionException.");
+                printMessage("User '" + username + "' validation failed by PrincipalValidator. Throwing IdentityAssertionException.");
             }
             throw new IdentityAssertionException("User '" + username + "' not found in security realm.");
         }
@@ -136,42 +158,52 @@ public final class CustomRealmIdentityAsserterProviderImpl implements Authentica
 
     private boolean validateUserInRealm(Principal principal) {
         if (debugEnabled) {
-            printMesaage("Invoking PrincipalValidator.validate() for principal: " + principal.getName());
+            printMessage("Invoking PrincipalValidator.validate() for principal: " + principal.getName());
         }
         try {
             boolean isValid = this.principalValidator.validate(principal);
             if (debugEnabled) {
-                printMesaage("PrincipalValidator.validate() returned: " + isValid + " for " + principal.getName());
+                printMessage("PrincipalValidator.validate() returned: " + isValid + " for " + principal.getName());
             }
             return isValid;
         } catch (Exception e) {
             if (debugEnabled) {
-                printMesaage("Exception during PrincipalValidator.validate() for " + principal.getName() + ": " + e.getMessage());
+                printMessage("Exception during PrincipalValidator.validate() for " + principal.getName() + ": " + e.getMessage());
             }
             return false;
         }
     }
 
-    @Deprecated // This method seems to be for AuthenticationProvider, not typically part of IdentityAsserterV2 flow for assertion
+    @Deprecated
     public AppConfigurationEntry getLoginModuleConfiguration() {
-        // This method signature is usually for AuthenticationProviderV2's own LoginModule setup,
-        // not directly for the assertion process of IdentityAsserterV2.
-        // The original code uses System.out.println, let's keep it but add a debug flag check.
+        // This method is part of AuthenticationProviderV2, but for an Identity Asserter,
+        // getAssertionModuleConfiguration() is typically used for the assertion flow.
+        // This method might be called for traditional authentication flows.
         if (debugEnabled) {
-             printMesaage("getLoginModuleConfiguration called (non-assertion context).");
+             printMessage("getLoginModuleConfiguration called (non-assertion context).");
         }
-        // System.out.println("CustomRealmIdentityAsserterProviderImpl: getConfiguration of non Assertion!!! "); // Removed direct System.out.println
-
         HashMap<String, Object> paramHashMap = new HashMap<String, Object>();
-        paramHashMap.put("IdentityAssertion", "false"); // Setting a property for the LoginModule
+        paramHashMap.put("IdentityAssertion", "false"); // Indicate it's not for assertion flow here
+
+        // Use the configured loginModuleSufficient flag
+        LoginModuleControlFlag controlFlag = this.loginModuleSufficient ?
+            LoginModuleControlFlag.SUFFICIENT :
+            LoginModuleControlFlag.REQUIRED;
+
         return new AppConfigurationEntry(
             "com.oracle.il.css.CustomRealmLoginModuleImpl",
-            AppConfigurationEntry.LoginModuleControlFlag.SUFFICIENT,
+            controlFlag,
             paramHashMap
         );
     }
 
-    private void printMesaage(String message) {
+    // Corrected method name from printMesaage to printMessage
+    private void printMessage(String message) {
+        // Using logger.debug for actual logging, instead of System.out.println directly
+        // This ensures the messages go to the configured WebLogic log files
+        // and respect the server's logging level.
+        // logger.debug(message);
+        // If you still want to see it in standard out, you can keep:
         System.out.println("CustomRealmIdentityAsserterProviderImpl: " + message + ".");
     }
 }
